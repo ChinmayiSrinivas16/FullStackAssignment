@@ -1,0 +1,29 @@
+<div class="p-6 space-y-6">
+
+  <h1 class="text-2xl font-bold text-gray-800">Holdings</h1>
+
+  <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+
+    <div *ngFor="let h of holdings"
+         class="bg-white shadow rounded-xl p-5 space-y-2">
+
+      <h2 class="text-lg font-semibold">{{ h.symbol }}</h2>
+
+      <p class="text-sm text-gray-500">
+        Quantity: {{ h.quantity }}
+      </p>
+
+      <p class="text-sm text-gray-500">
+        Avg Price: ₹ {{ h.avgPrice }}
+      </p>
+
+      <p class="font-medium"
+         [ngClass]="h.pnl >= 0 ? 'text-green-600' : 'text-red-600'">
+        P&L: ₹ {{ h.pnl }}
+      </p>
+
+    </div>
+
+  </div>
+
+</div>

@@ -1,0 +1,174 @@
+<div class="space-y-8">
+
+  <!-- Header Section -->
+  <div>
+    <h1 class="text-4xl font-bold text-white mb-2">Welcome Back, Investor</h1>
+    <p class="text-gray-400">Here's your portfolio performance overview</p>
+  </div>
+
+  <!-- Portfolio Summary Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+    <!-- Total Investment Card -->
+    <div class="group bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl border border-gray-700/50 shadow-xl hover:shadow-2xl hover:border-blue-500/50 transition-all duration-300 cursor-pointer">
+      <div class="flex justify-between items-start mb-4">
+        <div>
+          <p class="text-gray-400 text-sm font-medium">Total Investment</p>
+          <h2 class="text-4xl font-bold text-white mt-2" *ngIf="dashboard">{{ dashboard.totalInvestment | currency:'INR':'₹':'1.0-0' }}</h2>
+        </div>
+        <div class="w-12 h-12 bg-blue-900/30 rounded-lg flex items-center justify-center text-xl group-hover:bg-blue-900/50 transition-all">
+          💰
+        </div>
+      </div>
+      <div class="pt-4 border-t border-gray-700/30">
+        <p class="text-xs text-gray-500">Capital invested</p>
+      </div>
+    </div>
+
+    <!-- Current Value Card -->
+    <div class="group bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl border border-gray-700/50 shadow-xl hover:shadow-2xl hover:border-cyan-500/50 transition-all duration-300 cursor-pointer">
+      <div class="flex justify-between items-start mb-4">
+        <div>
+          <p class="text-gray-400 text-sm font-medium">Current Value</p>
+          <h2 class="text-4xl font-bold text-white mt-2" *ngIf="dashboard">{{ dashboard.currentValue | currency:'INR':'₹':'1.0-0' }}</h2>
+        </div>
+        <div class="w-12 h-12 bg-cyan-900/30 rounded-lg flex items-center justify-center text-xl group-hover:bg-cyan-900/50 transition-all">
+          📊
+        </div>
+      </div>
+      <div class="pt-4 border-t border-gray-700/30">
+        <p class="text-xs text-gray-500">Current market value</p>
+      </div>
+    </div>
+
+    <!-- Total P&L Card -->
+    <div class="group bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl border border-gray-700/50 shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer" 
+         [class.hover:border-green-500/50]="dashboard.totalPnL >= 0"
+         [class.hover:border-red-500/50]="dashboard.totalPnL < 0">
+      <div class="flex justify-between items-start mb-4">
+        <div>
+          <p class="text-gray-400 text-sm font-medium">Total P&L</p>
+          <h2 class="text-4xl font-bold mt-2" 
+              *ngIf="dashboard"
+              [class.text-green-400]="dashboard.totalPnL >= 0"
+              [class.text-red-400]="dashboard.totalPnL < 0">
+            <span *ngIf="dashboard.totalPnL >= 0">+</span>{{ dashboard.totalPnL | currency:'INR':'₹':'1.0-0' }}
+          </h2>
+        </div>
+        <div class="w-12 h-12 rounded-lg flex items-center justify-center text-xl transition-all"
+             [class.bg-green-900/30]="dashboard.totalPnL >= 0"
+             [class.bg-red-900/30]="dashboard.totalPnL < 0">
+          <span *ngIf="dashboard.totalPnL >= 0">📈</span>
+          <span *ngIf="dashboard.totalPnL < 0">📉</span>
+        </div>
+      </div>
+      <div class="pt-4 border-t border-gray-700/30">
+        <p class="text-xs" 
+           [class.text-green-500]="dashboard.totalPnL >= 0"
+           [class.text-red-500]="dashboard.totalPnL < 0">
+          <span *ngIf="dashboard.totalPnL >= 0">Profit</span>
+          <span *ngIf="dashboard.totalPnL < 0">Loss</span>
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Live Market Watch Section -->
+  <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl border border-gray-700/50 shadow-xl overflow-hidden">
+    
+    <!-- Header -->
+    <div class="px-8 py-6 border-b border-gray-700/30 bg-gradient-to-r from-gray-800 to-gray-900">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-xl font-bold text-white">📈 Live Market Watch</h3>
+          <p class="text-xs text-gray-400 mt-1">Real-time stock prices and performance</p>
+        </div>
+        <div class="flex items-center space-x-2 bg-green-900/20 px-3 py-1 rounded-full">
+          <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+          <span class="text-xs text-green-400 font-medium">Live</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead>
+          <tr class="bg-gray-900/50 border-b border-gray-700/30">
+            <th class="text-left px-8 py-4 text-sm font-semibold text-gray-300">Stock</th>
+            <th class="text-left px-8 py-4 text-sm font-semibold text-gray-300">Price</th>
+            <th class="text-left px-8 py-4 text-sm font-semibold text-gray-300">Change</th>
+            <th class="text-left px-8 py-4 text-sm font-semibold text-gray-300">% Change</th>
+            <th class="text-left px-8 py-4 text-sm font-semibold text-gray-300">Volume</th>
+            <th class="text-left px-8 py-4 text-sm font-semibold text-gray-300">Market Cap</th>
+          </tr>
+        </thead>
+
+        <tbody class="divide-y divide-gray-700/20">
+          <tr class="hover:bg-gray-800/50 transition-all duration-300 cursor-pointer group">
+            <td class="px-8 py-5 font-semibold text-white group-hover:text-blue-300">RELIANCE</td>
+            <td class="px-8 py-5 text-gray-200">₹ 2,850.50</td>
+            <td class="px-8 py-5 text-green-400 font-medium">+₹ 35.25</td>
+            <td class="px-8 py-5">
+              <span class="inline-flex items-center space-x-1 px-3 py-1 rounded-full bg-green-900/20 text-green-400 text-sm font-medium">
+                <span>▲</span>
+                <span>+1.2%</span>
+              </span>
+            </td>
+            <td class="px-8 py-5 text-gray-400">2.5M</td>
+            <td class="px-8 py-5 text-gray-400">₹ 18.5T</td>
+          </tr>
+
+          <tr class="hover:bg-gray-800/50 transition-all duration-300 cursor-pointer group">
+            <td class="px-8 py-5 font-semibold text-white group-hover:text-blue-300">TCS</td>
+            <td class="px-8 py-5 text-gray-200">₹ 3,650.25</td>
+            <td class="px-8 py-5 text-red-400 font-medium">-₹ 29.75</td>
+            <td class="px-8 py-5">
+              <span class="inline-flex items-center space-x-1 px-3 py-1 rounded-full bg-red-900/20 text-red-400 text-sm font-medium">
+                <span>▼</span>
+                <span>-0.8%</span>
+              </span>
+            </td>
+            <td class="px-8 py-5 text-gray-400">1.2M</td>
+            <td class="px-8 py-5 text-gray-400">₹ 12.8T</td>
+          </tr>
+
+          <tr class="hover:bg-gray-800/50 transition-all duration-300 cursor-pointer group">
+            <td class="px-8 py-5 font-semibold text-white group-hover:text-blue-300">INFY</td>
+            <td class="px-8 py-5 text-gray-200">₹ 1,420.75</td>
+            <td class="px-8 py-5 text-green-400 font-medium">+₹ 32.50</td>
+            <td class="px-8 py-5">
+              <span class="inline-flex items-center space-x-1 px-3 py-1 rounded-full bg-green-900/20 text-green-400 text-sm font-medium">
+                <span>▲</span>
+                <span>+2.3%</span>
+              </span>
+            </td>
+            <td class="px-8 py-5 text-gray-400">1.8M</td>
+            <td class="px-8 py-5 text-gray-400">₹ 5.2T</td>
+          </tr>
+
+          <tr class="hover:bg-gray-800/50 transition-all duration-300 cursor-pointer group">
+            <td class="px-8 py-5 font-semibold text-white group-hover:text-blue-300">HDFCBANK</td>
+            <td class="px-8 py-5 text-gray-200">₹ 2,180.50</td>
+            <td class="px-8 py-5 text-green-400 font-medium">+₹ 45.75</td>
+            <td class="px-8 py-5">
+              <span class="inline-flex items-center space-x-1 px-3 py-1 rounded-full bg-green-900/20 text-green-400 text-sm font-medium">
+                <span>▲</span>
+                <span>+2.1%</span>
+              </span>
+            </td>
+            <td class="px-8 py-5 text-gray-400">3.1M</td>
+            <td class="px-8 py-5 text-gray-400">₹ 9.8T</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Footer -->
+    <div class="px-8 py-4 border-t border-gray-700/30 bg-gray-900/50 text-xs text-gray-500">
+      Last updated: 3:45 PM IST • Data delayed by 5 minutes
+    </div>
+  </div>
+
+</div>

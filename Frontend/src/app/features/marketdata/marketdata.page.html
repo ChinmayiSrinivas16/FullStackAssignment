@@ -1,0 +1,32 @@
+<div class="p-6 space-y-6">
+
+  <h1 class="text-2xl font-bold text-gray-800">Market Data</h1>
+
+  <!-- Search -->
+  <div class="flex gap-3">
+    <input type="text"
+           [(ngModel)]="symbol"
+           placeholder="Enter Stock Symbol"
+           class="border rounded-lg px-4 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+    <button (click)="fetchQuote()"
+            class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700">
+      Search
+    </button>
+  </div>
+
+  <!-- Result Card -->
+  <div *ngIf="quote"
+       class="bg-white shadow rounded-xl p-6 space-y-2 w-96">
+
+    <h2 class="text-lg font-semibold">{{ quote.symbol }}</h2>
+    <p>Price: ₹ {{ quote.price }}</p>
+    <p>High: ₹ {{ quote.high }}</p>
+    <p>Low: ₹ {{ quote.low }}</p>
+    <p [ngClass]="quote.change >= 0 ? 'text-green-600' : 'text-red-600'">
+      Change: {{ quote.change }}%
+    </p>
+
+  </div>
+
+</div>

@@ -1,6 +1,10 @@
 export interface Transaction {
-  id: string;
+  id: number;
   date: string;
   amount: number;
   description?: string;
+  symbol: string;
+  type: 'BUY' | 'SELL';
+  quantity: number;
+  price: number;
 }

@@ -1,14 +1,25 @@
 import { Routes } from '@angular/router';
-import { LandingComponent } from './pages/landing/landing.component';
-import { LoginComponent } from './pages/login/login.component';
-import { SignupComponent } from './pages/signup/signup.component';
-import { DashboardComponent } from './pages/dashboard/dashboard.component';
-import { AuthGuard } from './core/guards/auth.guard';
+
+import { DashboardPage } from './features/dashboard/dashboard.page';
+import { TransactionsPage } from './features/transactions/transactions.page';
+import { HoldingsPage } from './features/holdings/holdings.page';
+import { MarketdataPage } from './features/marketdata/marketdata.page';
+import { AnalyticsPage } from './features/analytics/analytics.page';
+import { ReportsPage } from './features/reports/reports.page';
 
 export const routes: Routes = [
-  { path: '', component: LandingComponent },
-  { path: 'login', component: LoginComponent },
-  { path: 'signup', component: SignupComponent },
-  { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
-  { path: '**', redirectTo: '' }
+
+  // Default Route
+  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+
+  // Main Features
+  { path: 'dashboard', component: DashboardPage },
+  { path: 'transactions', component: TransactionsPage },
+  { path: 'holdings', component: HoldingsPage },
+  { path: 'marketdata', component: MarketdataPage },
+  { path: 'analytics', component: AnalyticsPage },
+  { path: 'reports', component: ReportsPage },
+
+  // Wildcard
+  { path: '**', redirectTo: 'dashboard' }
 ];

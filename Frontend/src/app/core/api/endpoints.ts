@@ -1,8 +1,8 @@
 export const ENDPOINTS = {
-  DASHBOARD: '/api/dashboard',
-  TRANSACTIONS: '/api/transactions',
-  HOLDINGS: '/api/holdings',
-  MARKETDATA: '/api/marketdata',
-  ANALYTICS: '/api/analytics',
-  REPORTS: '/api/reports'
-};
+  DASHBOARD: '/dashboard',
+  TRANSACTIONS: '/transactions',
+  HOLDINGS: '/holdings',
+  MARKET: '/market',
+  ANALYTICS: '/analytics',
+  REPORTS: '/reports'
+} as const;

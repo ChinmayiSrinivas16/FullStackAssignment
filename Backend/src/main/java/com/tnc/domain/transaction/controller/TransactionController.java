@@ -11,4 +11,79 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;\n\nimport java.time.LocalDate;\nimport java.util.List;\n\n@RestController\n@RequestMapping(\"/api/v1/transactions\")\n@RequiredArgsConstructor\n@Tag(name = \"Transactions\", description = \"Transaction management endpoints\")\npublic class TransactionController {\n\n    private final TransactionService transactionService;\n\n    @PostMapping\n    @Operation(summary = \"Create new transaction\")\n    public ResponseEntity<ApiResponse<TransactionResponse>> createTransaction(\n            @RequestBody TransactionCreateRequest request) {\n        TransactionResponse response = transactionService.createTransaction(request);\n        return ResponseEntity.status(HttpStatus.CREATED)\n                .body(ApiResponse.success(response, \"Transaction created successfully\"));\n    }\n\n    @GetMapping\n    @Operation(summary = \"Get all transactions\")\n    public ResponseEntity<ApiResponse<List<TransactionResponse>>> getAllTransactions() {\n        List<TransactionResponse> transactions = transactionService.getAllTransactions();\n        return ResponseEntity.ok(ApiResponse.success(transactions, \"Transactions retrieved successfully\"));\n    }\n\n    @GetMapping(\"/{id}\")\n    @Operation(summary = \"Get transaction by ID\")\n    public ResponseEntity<ApiResponse<TransactionResponse>> getTransaction(@PathVariable Long id) {\n        TransactionResponse response = transactionService.getTransaction(id);\n        return ResponseEntity.ok(ApiResponse.success(response));\n    }\n\n    @PutMapping(\"/{id}\")\n    @Operation(summary = \"Update transaction\")\n    public ResponseEntity<ApiResponse<TransactionResponse>> updateTransaction(\n            @PathVariable Long id,\n            @RequestBody TransactionUpdateRequest request) {\n        TransactionResponse response = transactionService.updateTransaction(id, request);\n        return ResponseEntity.ok(ApiResponse.success(response, \"Transaction updated successfully\"));\n    }\n\n    @DeleteMapping(\"/{id}\")\n    @Operation(summary = \"Delete transaction\")\n    public ResponseEntity<ApiResponse<Void>> deleteTransaction(@PathVariable Long id) {\n        transactionService.deleteTransaction(id);\n        return ResponseEntity.ok(ApiResponse.success(null, \"Transaction deleted successfully\"));\n    }\n\n    @GetMapping(\"/symbol/{symbol}\")\n    @Operation(summary = \"Get transactions by symbol\")\n    public ResponseEntity<ApiResponse<List<TransactionResponse>>> getTransactionsBySymbol(\n            @PathVariable String symbol) {\n        List<TransactionResponse> transactions = transactionService.getTransactionsBySymbol(symbol);\n        return ResponseEntity.ok(ApiResponse.success(transactions));\n    }\n\n    @GetMapping(\"/date-range/search\")\n    @Operation(summary = \"Get transactions by date range\")\n    public ResponseEntity<ApiResponse<List<TransactionResponse>>> getTransactionsByDateRange(\n            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,\n            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {\n        List<TransactionResponse> transactions = transactionService.getTransactionsByDateRange(startDate, endDate);\n        return ResponseEntity.ok(ApiResponse.success(transactions));\n    }\n\n    @GetMapping(\"/symbols/all\")\n    @Operation(summary = \"Get all unique symbols\")\n    public ResponseEntity<ApiResponse<List<String>>> getAllSymbols() {\n        List<String> symbols = transactionService.getAllSymbols();\n        return ResponseEntity.ok(ApiResponse.success(symbols));\n    }\n}
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/v1/transactions")
+@RequiredArgsConstructor
+@Tag(name = "Transactions", description = "Transaction management endpoints")
+public class TransactionController {
+
+	private final TransactionService transactionService;
+
+	@PostMapping
+	@Operation(summary = "Create new transaction")
+	public ResponseEntity<ApiResponse<TransactionResponse>> createTransaction(
+			@RequestBody TransactionCreateRequest request) {
+		TransactionResponse response = transactionService.createTransaction(request);
+		return ResponseEntity.status(HttpStatus.CREATED)
+				.body(ApiResponse.success(response, "Transaction created successfully"));
+	}
+
+	@GetMapping
+	@Operation(summary = "Get all transactions")
+	public ResponseEntity<ApiResponse<List<TransactionResponse>>> getAllTransactions() {
+		List<TransactionResponse> transactions = transactionService.getAllTransactions();
+		return ResponseEntity.ok(ApiResponse.success(transactions, "Transactions retrieved successfully"));
+	}
+
+	@GetMapping("/{id}")
+	@Operation(summary = "Get transaction by ID")
+	public ResponseEntity<ApiResponse<TransactionResponse>> getTransaction(@PathVariable Long id) {
+		TransactionResponse response = transactionService.getTransaction(id);
+		return ResponseEntity.ok(ApiResponse.success(response));
+	}
+
+	@PutMapping("/{id}")
+	@Operation(summary = "Update transaction")
+	public ResponseEntity<ApiResponse<TransactionResponse>> updateTransaction(
+			@PathVariable Long id,
+			@RequestBody TransactionUpdateRequest request) {
+		TransactionResponse response = transactionService.updateTransaction(id, request);
+		return ResponseEntity.ok(ApiResponse.success(response, "Transaction updated successfully"));
+	}
+
+	@DeleteMapping("/{id}")
+	@Operation(summary = "Delete transaction")
+	public ResponseEntity<ApiResponse<Void>> deleteTransaction(@PathVariable Long id) {
+		transactionService.deleteTransaction(id);
+		return ResponseEntity.ok(ApiResponse.success(null, "Transaction deleted successfully"));
+	}
+
+	@GetMapping("/symbol/{symbol}")
+	@Operation(summary = "Get transactions by symbol")
+	public ResponseEntity<ApiResponse<List<TransactionResponse>>> getTransactionsBySymbol(
+			@PathVariable String symbol) {
+		List<TransactionResponse> transactions = transactionService.getTransactionsBySymbol(symbol);
+		return ResponseEntity.ok(ApiResponse.success(transactions));
+	}
+
+	@GetMapping("/date-range/search")
+	@Operation(summary = "Get transactions by date range")
+	public ResponseEntity<ApiResponse<List<TransactionResponse>>> getTransactionsByDateRange(
+			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+		List<TransactionResponse> transactions = transactionService.getTransactionsByDateRange(startDate, endDate);
+		return ResponseEntity.ok(ApiResponse.success(transactions));
+	}
+
+	@GetMapping("/symbols/all")
+	@Operation(summary = "Get all unique symbols")
+	public ResponseEntity<ApiResponse<List<String>>> getAllSymbols() {
+		List<String> symbols = transactionService.getAllSymbols();
+		return ResponseEntity.ok(ApiResponse.success(symbols));
+	}
+}

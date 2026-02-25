@@ -25,4 +25,26 @@ public class SymbolNormalizationService {
         put("icici", "ICICIBANK");
         put("hindunilvr", "HINDUNILVR");
         put("axis", "AXISBANK");
-    }};\n\n    /**\n     * Normalize symbol to uppercase NSE code\n     */\n    public String normalize(String input) {\n        if (input == null || input.trim().isEmpty()) {\n            return \"\";\n        }\n        String lower = input.toLowerCase().trim();\n        return SYMBOL_MAPPING.getOrDefault(lower, input.toUpperCase());\n    }\n\n    /**\n     * Check if symbol is valid NSE format\n     */\n    public boolean isValidSymbol(String symbol) {\n        if (symbol == null || symbol.trim().isEmpty()) {\n            return false;\n        }\n        // NSE symbols are usually 1-10 characters, alphanumeric with hyphens\n        return symbol.matches(\"^[A-Z0-9-]{1,10}$\");\n    }\n}
+    }};
+
+    /**
+     * Normalize symbol to uppercase NSE code
+     */
+    public String normalize(String input) {
+        if (input == null || input.trim().isEmpty()) {
+            return "";
+        }
+        String lower = input.toLowerCase().trim();
+        return SYMBOL_MAPPING.getOrDefault(lower, input.toUpperCase());
+    }
+
+    /**
+     * Check if symbol is valid NSE format
+     */
+    public boolean isValidSymbol(String symbol) {
+        if (symbol == null || symbol.trim().isEmpty()) {
+            return false;
+        }
+        return symbol.matches("^[A-Z0-9-]{1,10}$");
+    }
+}

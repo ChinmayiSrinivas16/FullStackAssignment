@@ -19,14 +19,14 @@ public class ReportsService {
      * Generate report in specified format
      */
     public byte[] generateReport(ReportRequestDTO request) throws IOException {
-        log.info(\"Generating {} report in {} format\", request.getReportType(), request.getFormat());
+        log.info("Generating {} report in {} format", request.getReportType(), request.getFormat());
 
-        if (\"EXCEL\".equalsIgnoreCase(request.getFormat())) {
+        if ("EXCEL".equalsIgnoreCase(request.getFormat())) {
             return excelExportService.generateExcelReport();
-        } else if (\"PDF\".equalsIgnoreCase(request.getFormat())) {
+        } else if ("PDF".equalsIgnoreCase(request.getFormat())) {
             return pdfExportService.generatePdfReport();
         }
 
-        throw new IllegalArgumentException(\"Unsupported format: \" + request.getFormat());
+        throw new IllegalArgumentException("Unsupported format: " + request.getFormat());
     }
 }

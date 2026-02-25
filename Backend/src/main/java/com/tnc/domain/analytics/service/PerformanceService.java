@@ -46,7 +46,7 @@ public class PerformanceService {
             performance.add(TimeSeriesPointDTO.builder()
                     .date(date)
                     .value(BigDecimal.ZERO)
-                    .label(date.getYear() + \"-\" + date.getMonthValue())
+                    .label(date.getYear() + "-" + date.getMonthValue())
                     .build());
         }
         return performance;

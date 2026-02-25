@@ -11,22 +11,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(\"/api/v1/holdings\")
+@RequestMapping("/api/v1/holdings")
 @RequiredArgsConstructor
-@Tag(name = \"Holdings\", description = \"Portfolio holdings endpoints\")
+@Tag(name = "Holdings", description = "Portfolio holdings endpoints")
 public class HoldingsController {
 
     private final HoldingsService holdingsService;
 
     @GetMapping
-    @Operation(summary = \"Get all current holdings with gains/losses\")
+    @Operation(summary = "Get all current holdings with gains/losses")
     public ResponseEntity<ApiResponse<HoldingsSummaryDTO>> getAllHoldings() {
         HoldingsSummaryDTO holdings = holdingsService.getAllHoldings();
-        return ResponseEntity.ok(ApiResponse.success(holdings, \"Holdings retrieved successfully\"));
+        return ResponseEntity.ok(ApiResponse.success(holdings, "Holdings retrieved successfully"));
     }
 
-    @GetMapping(\"/{symbol}\")
-    @Operation(summary = \"Get holding details for a specific symbol\")
+    @GetMapping("/{symbol}")
+    @Operation(summary = "Get holding details for a specific symbol")
     public ResponseEntity<ApiResponse<HoldingRowDTO>> getHoldingBySymbol(@PathVariable String symbol) {
         HoldingRowDTO holding = holdingsService.getHoldingBySymbol(symbol);
         return ResponseEntity.ok(ApiResponse.success(holding));

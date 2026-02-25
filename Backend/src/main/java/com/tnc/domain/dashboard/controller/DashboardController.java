@@ -12,17 +12,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(\"/api/v1/dashboard\")
+@RequestMapping("/api/v1/dashboard")
 @RequiredArgsConstructor
-@Tag(name = \"Dashboard\", description = \"Portfolio dashboard overview\")
+@Tag(name = "Dashboard", description = "Portfolio dashboard overview")
 public class DashboardController {
 
     private final DashboardService dashboardService;
 
     @GetMapping
-    @Operation(summary = \"Get portfolio dashboard with all key metrics\")
+    @Operation(summary = "Get portfolio dashboard with all key metrics")
     public ResponseEntity<ApiResponse<DashboardDTO>> getDashboard() {
         DashboardDTO dashboard = dashboardService.getDashboard();
-        return ResponseEntity.ok(ApiResponse.success(dashboard, \"Dashboard data retrieved successfully\"));
+        return ResponseEntity.ok(ApiResponse.success(dashboard, "Dashboard data retrieved successfully"));
     }
 }

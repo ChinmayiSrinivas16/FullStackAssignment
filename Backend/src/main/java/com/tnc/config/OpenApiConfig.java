@@ -13,11 +13,11 @@ public class OpenApiConfig {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title(\"Stock Portfolio Manager API\")
-                        .version(\"1.0.0\")
-                        .description(\"REST API for managing individual investor stock portfolio\")
+                .title("Stock Portfolio Manager API")
+                .version("1.0.0")
+                .description("REST API for managing individual investor stock portfolio")
                         .contact(new Contact()
-                                .name(\"Portfolio Manager Team\")
-                                .email(\"support@portfolio.local\")));
+                    .name("Portfolio Manager Team")
+                    .email("support@portfolio.local")));
     }
 }

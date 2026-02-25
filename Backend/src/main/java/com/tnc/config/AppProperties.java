@@ -10,5 +10,5 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "market.data")
 public class AppProperties {
-    private String provider = \"mock\";  // mock or external
+    private String provider = "mock";  // mock or external
 }

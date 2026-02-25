@@ -13,4 +13,67 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AnalyticsCalculator {
 
-    /**\n     * Get top N gaining stocks\n     */\n    public static List<TopMoversDTO> getTopGainers(List<HoldingRowDTO> holdings, int limit) {\n        return holdings.stream()\n                .filter(h -> h.getGainLoss().compareTo(BigDecimal.ZERO) > 0)\n                .sorted((a, b) -> b.getGainLoss().compareTo(a.getGainLoss()))\n                .limit(limit)\n                .map(h -> TopMoversDTO.builder()\n                        .symbol(h.getSymbol())\n                        .gainLoss(h.getGainLoss())\n                        .gainLossPercent(h.getGainLossPercent())\n                        .quantity(h.getQuantity())\n                        .currentValue(h.getCurrentValue())\n                        .build())\n                .collect(Collectors.toList());\n    }\n\n    /**\n     * Get top N losing stocks\n     */\n    public static List<TopMoversDTO> getTopLosers(List<HoldingRowDTO> holdings, int limit) {\n        return holdings.stream()\n                .filter(h -> h.getGainLoss().compareTo(BigDecimal.ZERO) < 0)\n                .sorted(Comparator.comparing(HoldingRowDTO::getGainLoss))\n                .limit(limit)\n                .map(h -> TopMoversDTO.builder()\n                        .symbol(h.getSymbol())\n                        .gainLoss(h.getGainLoss())\n                        .gainLossPercent(h.getGainLossPercent())\n                        .quantity(h.getQuantity())\n                        .currentValue(h.getCurrentValue())\n                        .build())\n                .collect(Collectors.toList());\n    }\n\n    /**\n     * Calculate portfolio allocation by symbol\n     */\n    public static List<AllocationDTO> calculateAllocation(List<HoldingRowDTO> holdings) {\n        BigDecimal totalValue = holdings.stream()\n                .map(HoldingRowDTO::getCurrentValue)\n                .reduce(BigDecimal.ZERO, BigDecimal::add);\n\n        if (totalValue.compareTo(BigDecimal.ZERO) <= 0) {\n            return Collections.emptyList();\n        }\n\n        return holdings.stream()\n                .map(h -> {\n                    BigDecimal percentage = h.getCurrentValue()\n                            .divide(totalValue, 4, RoundingMode.HALF_UP)\n                            .multiply(new BigDecimal(\"100\"))\n                            .setScale(2, RoundingMode.HALF_UP);\n                    return AllocationDTO.builder()\n                            .symbol(h.getSymbol())\n                            .value(h.getCurrentValue())\n                            .percentage(percentage)\n                            .build();\n                })\n                .sorted((a, b) -> b.getPercentage().compareTo(a.getPercentage()))\n                .collect(Collectors.toList());\n    }\n}
+    /**
+     * Get top N gaining stocks
+     */
+    public static List<TopMoversDTO> getTopGainers(List<HoldingRowDTO> holdings, int limit) {
+    return holdings.stream()
+        .filter(h -> h.getGainLoss().compareTo(BigDecimal.ZERO) > 0)
+        .sorted((a, b) -> b.getGainLoss().compareTo(a.getGainLoss()))
+        .limit(limit)
+        .map(h -> TopMoversDTO.builder()
+            .symbol(h.getSymbol())
+            .gainLoss(h.getGainLoss())
+            .gainLossPercent(h.getGainLossPercent())
+            .quantity(h.getQuantity())
+            .currentValue(h.getCurrentValue())
+            .build())
+        .collect(Collectors.toList());
+    }
+
+    /**
+     * Get top N losing stocks
+     */
+    public static List<TopMoversDTO> getTopLosers(List<HoldingRowDTO> holdings, int limit) {
+    return holdings.stream()
+        .filter(h -> h.getGainLoss().compareTo(BigDecimal.ZERO) < 0)
+        .sorted(Comparator.comparing(HoldingRowDTO::getGainLoss))
+        .limit(limit)
+        .map(h -> TopMoversDTO.builder()
+            .symbol(h.getSymbol())
+            .gainLoss(h.getGainLoss())
+            .gainLossPercent(h.getGainLossPercent())
+            .quantity(h.getQuantity())
+            .currentValue(h.getCurrentValue())
+            .build())
+        .collect(Collectors.toList());
+    }
+
+    /**
+     * Calculate portfolio allocation by symbol
+     */
+    public static List<AllocationDTO> calculateAllocation(List<HoldingRowDTO> holdings) {
+    BigDecimal totalValue = holdings.stream()
+        .map(HoldingRowDTO::getCurrentValue)
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+    if (totalValue.compareTo(BigDecimal.ZERO) <= 0) {
+        return Collections.emptyList();
+    }
+
+    return holdings.stream()
+        .map(h -> {
+            BigDecimal percentage = h.getCurrentValue()
+                .divide(totalValue, 4, RoundingMode.HALF_UP)
+                .multiply(new BigDecimal("100"))
+                .setScale(2, RoundingMode.HALF_UP);
+            return AllocationDTO.builder()
+                .symbol(h.getSymbol())
+                .value(h.getCurrentValue())
+                .percentage(percentage)
+                .build();
+        })
+        .sorted((a, b) -> b.getPercentage().compareTo(a.getPercentage()))
+        .collect(Collectors.toList());
+    }
+}

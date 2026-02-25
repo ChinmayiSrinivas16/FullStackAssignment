@@ -29,7 +29,7 @@ public class MarketDataService {
         // Try cache first
         var cached = cacheService.get(normalized);
         if (cached.isPresent()) {
-            log.debug("Returning cached price for {}\", normalized);
+            log.debug("Returning cached price for {}", normalized);
             return cached.get();
         }
 
@@ -59,7 +59,7 @@ public class MarketDataService {
                 .collect(Collectors.toList());
 
         if (!missing.isEmpty()) {
-            log.debug(\"Fetching prices for {} missing symbols\", missing.size());
+            log.debug("Fetching prices for {} missing symbols", missing.size());
             List<PriceQuoteDTO> fetched = priceProvider.getPrices(missing);
             cacheService.cacheAll(fetched);
             cached.addAll(fetched);

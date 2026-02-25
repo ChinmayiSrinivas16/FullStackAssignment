@@ -28,12 +28,30 @@ public class DashboardService {
         var topGainers = analyticsService.getTopGainers(3);
         var topLosers = analyticsService.getTopLosers(3);
 
-        String status = \"NEUTRAL\";
+        String status = "NEUTRAL";
         if (holdingsSummary.getTotalGainLoss().compareTo(BigDecimal.ZERO) > 0) {
-            status = \"PROFIT\";
+            status = "PROFIT";
         } else if (holdingsSummary.getTotalGainLoss().compareTo(BigDecimal.ZERO) < 0) {
-            status = \"LOSS\";
+            status = "LOSS";
         }
 
         var topHoldings = holdingsSummary.getHoldings().stream()
-                .sorted((a, b) -> b.getCurrentValue().compareTo(a.getCurrentValue()))\n                .limit(5)\n                .collect(Collectors.toList());\n\n        return DashboardDTO.builder()\n                .totalInvested(holdingsSummary.getTotalInvested())\n                .currentPortfolioValue(holdingsSummary.getTotalCurrentValue())\n                .totalGainLoss(holdingsSummary.getTotalGainLoss())\n                .totalGainLossPercent(holdingsSummary.getTotalGainLossPercent())\n                .gainLossStatus(status)\n                .totalStocksHeld(holdingsSummary.getTotalStocksHeld())\n                .profitableStocks(holdingsSummary.getProfitableCount())\n                .lossStocks(holdingsSummary.getLossCount())\n                .topGainers(topGainers)\n                .topLosers(topLosers)\n                .topHoldings(topHoldings)\n                .build();\n    }\n}
+                .sorted((a, b) -> b.getCurrentValue().compareTo(a.getCurrentValue()))
+                .limit(5)
+                .collect(Collectors.toList());
+
+        return DashboardDTO.builder()
+                .totalInvested(holdingsSummary.getTotalInvested())
+                .currentPortfolioValue(holdingsSummary.getTotalCurrentValue())
+                .totalGainLoss(holdingsSummary.getTotalGainLoss())
+                .totalGainLossPercent(holdingsSummary.getTotalGainLossPercent())
+                .gainLossStatus(status)
+                .totalStocksHeld(holdingsSummary.getTotalStocksHeld())
+                .profitableStocks(holdingsSummary.getProfitableCount())
+                .lossStocks(holdingsSummary.getLossCount())
+                .topGainers(topGainers)
+                .topLosers(topLosers)
+                .topHoldings(topHoldings)
+                .build();
+    }
+}

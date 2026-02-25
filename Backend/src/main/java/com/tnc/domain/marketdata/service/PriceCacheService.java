@@ -23,7 +23,7 @@ public class PriceCacheService {
     public void cacheAll(List<PriceQuoteDTO> quotes) {
         LocalDateTime now = LocalDateTime.now();
         quotes.forEach(quote -> priceCache.put(quote.getSymbol(), new CachedPrice(quote, now)));
-        log.debug("Cached {} prices\", quotes.size());
+        log.debug("Cached {} prices", quotes.size());
     }
 
     public Optional<PriceQuoteDTO> get(String symbol) {
@@ -48,7 +48,7 @@ public class PriceCacheService {
         }
 
         if (!expiredSymbols.isEmpty()) {
-            log.debug("Cache miss for symbols: {}\", expiredSymbols);
+            log.debug("Cache miss for symbols: {}", expiredSymbols);
         }
 
         return quotes;

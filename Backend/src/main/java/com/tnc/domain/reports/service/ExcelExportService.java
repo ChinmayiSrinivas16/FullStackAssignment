@@ -27,17 +27,17 @@ public class ExcelExportService {
 
         try (Workbook workbook = new XSSFWorkbook()) {
             // Create Summary Sheet
-            Sheet summarySheet = workbook.createSheet(\"Summary\");
+            Sheet summarySheet = workbook.createSheet("Summary");
             createSummarySheet(summarySheet, holdingsSummary.getTotalInvested(), 
                     holdingsSummary.getTotalCurrentValue(), holdingsSummary.getTotalGainLoss());
 
             // Create Holdings Sheet
-            Sheet holdingsSheet = workbook.createSheet(\"Holdings\");
+            Sheet holdingsSheet = workbook.createSheet("Holdings");
             createHoldingsSheet(holdingsSheet, holdingsSummary.getHoldings());
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             workbook.write(baos);
-            log.info(\"Excel report generated\");
+            log.info("Excel report generated");
             return baos.toByteArray();
         }
     }
@@ -45,31 +45,31 @@ public class ExcelExportService {
     private void createSummarySheet(Sheet sheet, java.math.BigDecimal invested, 
             java.math.BigDecimal current, java.math.BigDecimal gainLoss) {
         Row headerRow = sheet.createRow(0);
-        headerRow.createCell(0).setCellValue(\"Portfolio Summary\");
+        headerRow.createCell(0).setCellValue("Portfolio Summary");
 
         Row row2 = sheet.createRow(2);
-        row2.createCell(0).setCellValue(\"Total Invested\");
+        row2.createCell(0).setCellValue("Total Invested");
         row2.createCell(1).setCellValue(invested.doubleValue());
 
         Row row3 = sheet.createRow(3);
-        row3.createCell(0).setCellValue(\"Current Value\");
+        row3.createCell(0).setCellValue("Current Value");
         row3.createCell(1).setCellValue(current.doubleValue());
 
         Row row4 = sheet.createRow(4);
-        row4.createCell(0).setCellValue(\"Gain/Loss\");
+        row4.createCell(0).setCellValue("Gain/Loss");
         row4.createCell(1).setCellValue(gainLoss.doubleValue());
     }
 
     private void createHoldingsSheet(Sheet sheet, List<HoldingRowDTO> holdings) {
         Row headerRow = sheet.createRow(0);
-        headerRow.createCell(0).setCellValue(\"Symbol\");
-        headerRow.createCell(1).setCellValue(\"Quantity\");
-        headerRow.createCell(2).setCellValue(\"Avg Buy Price\");
-        headerRow.createCell(3).setCellValue(\"Current Price\");
-        headerRow.createCell(4).setCellValue(\"Investment\");
-        headerRow.createCell(5).setCellValue(\"Current Value\");
-        headerRow.createCell(6).setCellValue(\"Gain/Loss\");
-        headerRow.createCell(7).setCellValue(\"Gain/Loss %\");
+        headerRow.createCell(0).setCellValue("Symbol");
+        headerRow.createCell(1).setCellValue("Quantity");
+        headerRow.createCell(2).setCellValue("Avg Buy Price");
+        headerRow.createCell(3).setCellValue("Current Price");
+        headerRow.createCell(4).setCellValue("Investment");
+        headerRow.createCell(5).setCellValue("Current Value");
+        headerRow.createCell(6).setCellValue("Gain/Loss");
+        headerRow.createCell(7).setCellValue("Gain/Loss %");
 
         int rowNum = 1;
         for (HoldingRowDTO holding : holdings) {

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <div class="space-y-8">
 
   <!-- Header Section -->
@@ -36,7 +37,207 @@
         <h3 class="text-white font-semibold">Holdings from Dashboard</h3>
         <p class="text-gray-400 text-sm">Your complete holdings summary is available on the Dashboard page with P&L calculations.</p>
       </div>
+=======
+<div class="holdings-container">
+
+  <div class="page-header">
+    <h1 class="page-title">Your Holdings</h1>
+    <p class="page-subtitle">Manage and monitor all your investment positions</p>
+  </div>
+
+  <!-- Holdings Table -->
+  <div class="holdings-card">
+    <div class="table-container">
+      <table class="data-table" *ngIf="holdings && holdings.length > 0">
+        <thead>
+          <tr>
+            <th>Stock Symbol</th>
+            <th>Quantity</th>
+            <th>Avg Price</th>
+            <th>Current Value</th>
+            <th>Gain/Loss</th>
+            <th>Return %</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let holding of holdings">
+            <td class="symbol-cell">
+              <span class="symbol-badge">{{ holding.symbol }}</span>
+            </td>
+            <td>{{ holding.quantity }}</td>
+            <td>₹ {{ holding.avgPrice | number:'1.2-2' }}</td>
+            <td>₹ {{ (holding.quantity * holding.avgPrice) | number:'1.2-2' }}</td>
+            <td [class.positive]="holding.pnl >= 0" [class.negative]="holding.pnl < 0">
+              <span class="pnl-badge" [class.success]="holding.pnl >= 0" [class.danger]="holding.pnl < 0">
+                <span *ngIf="holding.pnl >= 0">▲</span>
+                <span *ngIf="holding.pnl < 0">▼</span>
+                ₹ {{ holding.pnl | number:'1.2-2' }}
+              </span>
+            </td>
+            <td>
+              <span [class.positive]="(holding.pnl / (holding.quantity * holding.avgPrice) * 100) >= 0"
+                    [class.negative]="(holding.pnl / (holding.quantity * holding.avgPrice) * 100) < 0">
+                {{ ((holding.pnl / (holding.quantity * holding.avgPrice)) * 100) | number:'1.2-2' }}%
+              </span>
+            </td>
+            <td>
+              <button class="action-btn">View</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!holdings || holdings.length === 0" class="empty-state">
+      <div class="empty-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+          <path d="M16 3h-2.17a2 2 0 0 0-3.66 0H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2z"></path>
+        </svg>
+      </div>
+      <h3>No Holdings Yet</h3>
+      <p>Add your first investment transaction to get started</p>
+>>>>>>> f947157924cbe88eb7a8b43a0cad16fa73dd23a0
     </div>
   </div>
 
 </div>
+<<<<<<< HEAD
+=======
+
+<style>
+  .holdings-container {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .page-header {
+    padding-bottom: 20px;
+  }
+
+  .page-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin-bottom: 8px;
+  }
+
+  .page-subtitle {
+    font-size: 16px;
+    color: #cbd5e1;
+  }
+
+  .holdings-card {
+    background: #1e293b;
+    border: 1px solid #475569;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .symbol-cell {
+    font-weight: 600;
+  }
+
+  .symbol-badge {
+    display: inline-block;
+    background: rgba(99, 102, 241, 0.15);
+    color: #818cf8;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .pnl-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .pnl-badge.success {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+  }
+
+  .pnl-badge.danger {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+  }
+
+  .positive {
+    color: #16a34a;
+  }
+
+  .negative {
+    color: #dc2626;
+  }
+
+  .action-btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: 1px solid #6366f1;
+    background: transparent;
+    color: #818cf8;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .action-btn:hover {
+    background: rgba(99, 102, 241, 0.15);
+  }
+
+  .empty-state {
+    padding: 60px 20px;
+    text-align: center;
+    color: #666;
+  }
+
+  .empty-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 16px;
+    padding: 12px;
+    background: #334155;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+  }
+
+  .empty-state h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 16px 0 8px;
+  }
+
+  .empty-state p {
+    font-size: 14px;
+    color: #999;
+  }
+
+  @media (max-width: 768px) {
+    .page-title {
+      font-size: 22px;
+    }
+
+    .data-table {
+      font-size: 12px;
+    }
+
+    .data-table th,
+    .data-table td {
+      padding: 12px;
+    }
+  }
+</style>
+>>>>>>> f947157924cbe88eb7a8b43a0cad16fa73dd23a0

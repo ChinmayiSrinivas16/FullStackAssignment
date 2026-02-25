@@ -1,20 +1,11 @@
-<div class="p-6 space-y-6">
+<div class="marketdata-container">
 
-  <h1 class="text-2xl font-bold text-gray-800">Market Data</h1>
-
-  <!-- Search -->
-  <div class="flex gap-3">
-    <input type="text"
-           [(ngModel)]="symbol"
-           placeholder="Enter Stock Symbol"
-           class="border rounded-lg px-4 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-blue-500">
-
-    <button (click)="fetchQuote()"
-            class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700">
-      Search
-    </button>
+  <div class="page-header">
+    <h1 class="page-title">Market Data</h1>
+    <p class="page-subtitle">Search and view real-time stock quotes</p>
   </div>
 
+<<<<<<< HEAD
   <!-- Result Card -->
   <div *ngIf="quote"
        class="bg-white shadow rounded-xl p-6 space-y-2 w-96">
@@ -32,3 +23,286 @@
   </div>
 
 </div>
+=======
+  <!-- Search Section -->
+  <div class="search-card">
+    <div class="search-input-group">
+      <input 
+        type="text"
+        [(ngModel)]="symbol"
+        placeholder="Enter stock symbol (e.g., INFY, TCS, RELIANCE)"
+        class="search-input"
+        (keyup.enter)="fetchQuote()">
+      <button (click)="fetchQuote()" class="search-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.35-4.35"></path>
+        </svg>
+        Search
+      </button>
+    </div>
+  </div>
+
+  <!-- Quote Result Card -->
+  <div *ngIf="quote" class="quote-card">
+    <div class="quote-header">
+      <div class="quote-symbol">
+        <h2>{{ quote.symbol }}</h2>
+        <p class="quote-subtitle">Stock Information</p>
+      </div>
+      <div class="quote-price">
+        <p class="current-price">₹ {{ quote.price | number:'1.2-2' }}</p>
+        <p class="price-change" [class.positive]="quote.change >= 0" [class.negative]="quote.change < 0">
+          <span *ngIf="quote.change >= 0">▲</span>
+          <span *ngIf="quote.change < 0">▼</span>
+          {{ quote.change | number:'1.2-2' }}%
+        </p>
+      </div>
+    </div>
+
+    <div class="quote-grid">
+      <div class="quote-item">
+        <span class="label">High</span>
+        <span class="value">₹ {{ quote.high | number:'1.2-2' }}</span>
+      </div>
+      <div class="quote-item">
+        <span class="label">Low</span>
+        <span class="value">₹ {{ quote.low | number:'1.2-2' }}</span>
+      </div>
+      <div class="quote-item">
+        <span class="label">Volume</span>
+        <span class="value">{{ quote.volume | number:'1.0-0' }}</span>
+      </div>
+      <div class="quote-item">
+        <span class="label">Market Cap</span>
+        <span class="value">₹ {{ quote.marketCap | number:'1.0-0' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Fetching market data...</p>
+  </div>
+
+</div>
+
+<style>
+  .marketdata-container {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .page-header {
+    padding-bottom: 20px;
+  }
+
+  .page-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin-bottom: 8px;
+  }
+
+  .page-subtitle {
+    font-size: 16px;
+    color: #cbd5e1;
+  }
+
+  .search-card {
+    background: #1e293b;
+    border: 1px solid #475569;
+    border-radius: 12px;
+    padding: 24px;
+  }
+
+  .search-input-group {
+    display: flex;
+    gap: 12px;
+  }
+
+  .search-input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1px solid #475569;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    background: #334155;
+    color: #f1f5f9;
+  }
+
+  .search-input:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    background: #0f172a;
+  }
+
+  .search-btn {
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+
+  .search-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(99, 102, 241, 0.4);
+  }
+
+  .quote-card {
+    background: #1e293b;
+    border: 1px solid #475569;
+    border-radius: 12px;
+    padding: 32px;
+  }
+
+  .quote-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #475569;
+  }
+
+  .quote-symbol h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin-bottom: 4px;
+  }
+
+  .quote-subtitle {
+    font-size: 13px;
+    color: #94a3b8;
+  }
+
+  .quote-price {
+    text-align: right;
+  }
+
+  .current-price {
+    font-size: 32px;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin-bottom: 4px;
+  }
+
+  .price-change {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .price-change.positive {
+    background: rgba(16, 185, 129, 0.15);
+    color: #86efac;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+  }
+
+  .price-change.negative {
+    background: rgba(239, 68, 68, 0.15);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+  }
+
+  .quote-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+  }
+
+  .quote-item {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .quote-item .label {
+    font-size: 12px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+
+  .quote-item .value {
+    font-size: 18px;
+    font-weight: 600;
+    color: #f1f5f9;
+  }
+
+  .loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 60px 20px;
+    background: #1e293b;
+    border: 1px solid #475569;
+    border-radius: 12px;
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #e5e7eb;
+    border-top-color: #5b7cfa;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .loading-state p {
+    color: #666;
+    font-weight: 500;
+  }
+
+  @media (max-width: 768px) {
+    .search-input-group {
+      flex-direction: column;
+    }
+
+    .search-btn {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .quote-header {
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .quote-price {
+      text-align: left;
+    }
+
+    .quote-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .current-price {
+      font-size: 24px;
+    }
+  }
+</style>
+>>>>>>> f947157924cbe88eb7a8b43a0cad16fa73dd23a0

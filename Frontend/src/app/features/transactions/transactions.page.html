@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <div class="space-y-8">
 
   <!-- Header Section -->
@@ -91,18 +92,76 @@
         </tbody>
       </table>
     </div>
+=======
+<div class="transactions-container">
+>>>>>>> f947157924cbe88eb7a8b43a0cad16fa73dd23a0
 
+  <div class="page-header">
+    <h1 class="page-title">Transaction History</h1>
+    <p class="page-subtitle">View all your investment transactions</p>
   </div>
 
+<<<<<<< HEAD
   <!-- No Transactions State -->
   <div *ngIf="!loading && transactions.length === 0 && portfolios.length > 0" class="bg-gray-800 rounded-2xl p-12 text-center">
     <div class="text-6xl mb-4">📝</div>
     <h2 class="text-2xl font-bold text-white mb-2">No Transactions Yet</h2>
     <p class="text-gray-400">Add your first transaction to get started!</p>
+=======
+  <!-- Transactions Table -->
+  <div class="transactions-card">
+    <div class="table-container">
+      <table class="data-table" *ngIf="transactions && transactions.length > 0">
+        <thead>
+          <tr>
+            <th>Stock Symbol</th>
+            <th>Transaction Type</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Total Amount</th>
+            <th>Date</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let tx of transactions">
+            <td class="symbol-cell">
+              <span class="symbol-badge">{{ tx.symbol }}</span>
+            </td>
+            <td>
+              <span class="type-badge" [class.buy]="tx.type === 'BUY'" [class.sell]="tx.type === 'SELL'">
+                {{ tx.type === 'BUY' ? '▼ BUY' : '▲ SELL' }}
+              </span>
+            </td>
+            <td>{{ tx.quantity }}</td>
+            <td>₹ {{ tx.price | number:'1.2-2' }}</td>
+            <td class="amount-cell">₹ {{ (tx.quantity * tx.price) | number:'1.2-2' }}</td>
+            <td>{{ tx.date | date:'dd MMM yyyy' }}</td>
+            <td>
+              <button (click)="deleteTransaction(tx.id)" class="delete-btn" title="Delete">✕</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!transactions || transactions.length === 0" class="empty-state">
+      <div class="empty-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="12 1 12 23"></polyline>
+          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+        </svg>
+      </div>
+      <h3>No Transactions Yet</h3>
+      <p>Add your first investment to get started</p>
+    </div>
+>>>>>>> f947157924cbe88eb7a8b43a0cad16fa73dd23a0
   </div>
 
 </div>
 
+<<<<<<< HEAD
 <!-- Add Transaction Modal -->
 <div *ngIf="showAddModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
   <div class="bg-gray-800 rounded-2xl p-8 w-full max-w-md border border-gray-700">
@@ -196,3 +255,139 @@
     </form>
   </div>
 </div>
+=======
+<style>
+  .transactions-container {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .page-header {
+    padding-bottom: 20px;
+  }
+
+  .page-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin-bottom: 8px;
+  }
+
+  .page-subtitle {
+    font-size: 16px;
+    color: #cbd5e1;
+  }
+
+  .transactions-card {
+    background: #1e293b;
+    border: 1px solid #475569;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .symbol-cell {
+    font-weight: 600;
+  }
+
+  .symbol-badge {
+    display: inline-block;
+    background: rgba(99, 102, 241, 0.15);
+    color: #818cf8;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .type-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .type-badge.buy {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+  }
+
+  .type-badge.sell {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+  }
+
+  .amount-cell {
+    font-weight: 600;
+    color: #1a1a1a;
+  }
+
+  .delete-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid #fee2e2;
+    background: transparent;
+    color: #dc2626;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .delete-btn:hover {
+    background: #fee2e2;
+  }
+
+  .empty-state {
+    padding: 60px 20px;
+    text-align: center;
+    color: #666;
+  }
+
+  .empty-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 16px;
+    padding: 12px;
+    background: #334155;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+  }
+
+  .empty-state h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 16px 0 8px;
+  }
+
+  .empty-state p {
+    font-size: 14px;
+    color: #999;
+  }
+
+  @media (max-width: 768px) {
+    .page-title {
+      font-size: 22px;
+    }
+
+    .data-table {
+      font-size: 12px;
+    }
+
+    .data-table th,
+    .data-table td {
+      padding: 12px;
+    }
+  }
+</style>
+>>>>>>> f947157924cbe88eb7a8b43a0cad16fa73dd23a0

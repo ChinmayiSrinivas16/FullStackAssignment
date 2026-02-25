@@ -11,8 +11,11 @@ import { AuthService } from '../../core/services/auth.service';
     <div class="dashboard-container">
       <nav class="navbar">
         <div class="logo">
-          <span class="logo-icon">📈</span>
-          <span class="logo-text">Portfolio Tracker</span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 17"></polyline>
+            <polyline points="17 6 23 6 23 12"></polyline>
+          </svg>
+          <span class="logo-text">InvestPro</span>
         </div>
         <div class="user-menu">
           <span class="user-name">{{ userName }}</span>
@@ -26,23 +29,39 @@ import { AuthService } from '../../core/services/auth.service';
         
         <div class="stats-grid">
           <div class="stat-card">
-            <div class="stat-icon">💵</div>
+            <div class="stat-icon icon-blue">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="12 1 12 23"></polyline>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+              </svg>
+            </div>
             <div class="stat-info">
               <span class="stat-label">Total Value</span>
-              <span class="stat-value">$0.00</span>
+              <span class="stat-value">₹ 0.00</span>
             </div>
           </div>
           
           <div class="stat-card">
-            <div class="stat-icon">📈</div>
+            <div class="stat-icon icon-green">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 17"></polyline>
+                <polyline points="17 6 23 6 23 12"></polyline>
+              </svg>
+            </div>
             <div class="stat-info">
               <span class="stat-label">Total Gain/Loss</span>
-              <span class="stat-value">$0.00</span>
+              <span class="stat-value">₹ 0.00</span>
             </div>
           </div>
           
           <div class="stat-card">
-            <div class="stat-icon">📊</div>
+            <div class="stat-icon icon-purple">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="20" x2="18" y2="10"></line>
+                <line x1="12" y1="20" x2="12" y2="4"></line>
+                <line x1="6" y1="20" x2="6" y2="14"></line>
+              </svg>
+            </div>
             <div class="stat-info">
               <span class="stat-label">Holdings</span>
               <span class="stat-value">0</span>
@@ -50,7 +69,12 @@ import { AuthService } from '../../core/services/auth.service';
           </div>
           
           <div class="stat-card">
-            <div class="stat-icon">💰</div>
+            <div class="stat-icon icon-orange">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                <polyline points="13 2 13 9 20 9"></polyline>
+              </svg>
+            </div>
             <div class="stat-info">
               <span class="stat-label">Transactions</span>
               <span class="stat-value">0</span>
@@ -75,7 +99,7 @@ import { AuthService } from '../../core/services/auth.service';
   styles: [`
     .dashboard-container {
       min-height: 100vh;
-      background: #f5f7fa;
+      background: #f8f9fb;
     }
 
     .navbar {
@@ -84,20 +108,29 @@ import { AuthService } from '../../core/services/auth.service';
       align-items: center;
       padding: 16px 40px;
       background: white;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      border-bottom: 1px solid #e5e7eb;
     }
 
     .logo {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       font-size: 20px;
       font-weight: 700;
-      color: #333;
     }
 
-    .logo-icon {
-      font-size: 24px;
+    .logo svg {
+      width: 24px;
+      height: 24px;
+      color: #5b7cfa;
+    }
+
+    .logo-text {
+      background: linear-gradient(135deg, #5b7cfa 0%, #748ffc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     .user-menu {
@@ -109,6 +142,7 @@ import { AuthService } from '../../core/services/auth.service';
     .user-name {
       color: #666;
       font-weight: 500;
+      font-size: 14px;
     }
 
     .btn {
@@ -119,29 +153,30 @@ import { AuthService } from '../../core/services/auth.service';
       transition: all 0.3s ease;
       cursor: pointer;
       border: none;
+      font-size: 13px;
     }
 
     .btn-outline {
       background: transparent;
-      color: #667eea;
-      border: 2px solid #667eea;
+      color: #5b7cfa;
+      border: 1px solid #5b7cfa;
     }
 
     .btn-outline:hover {
-      background: #667eea;
-      color: white;
+      background: #e7f0ff;
     }
 
     .dashboard-content {
-      max-width: 1200px;
+      max-width: 1400px;
       margin: 0 auto;
       padding: 40px;
     }
 
     .dashboard-content h1 {
-      color: #333;
+      color: #1a1a1a;
       margin: 0 0 8px 0;
       font-size: 32px;
+      font-weight: 700;
     }
 
     .welcome-text {
@@ -153,22 +188,54 @@ import { AuthService } from '../../core/services/auth.service';
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 24px;
+      gap: 20px;
       margin-bottom: 40px;
     }
 
     .stat-card {
       background: white;
+      border: 1px solid #e5e7eb;
       border-radius: 12px;
       padding: 24px;
       display: flex;
       align-items: center;
       gap: 16px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      transform: translateY(-4px);
     }
 
     .stat-icon {
-      font-size: 36px;
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .icon-blue {
+      background: #e7f0ff;
+      color: #5b7cfa;
+    }
+
+    .icon-green {
+      background: #e7f5f0;
+      color: #16a34a;
+    }
+
+    .icon-purple {
+      background: #f4e7ff;
+      color: #9333ea;
+    }
+
+    .icon-orange {
+      background: #fff5e7;
+      color: #f97316;
     }
 
     .stat-info {
@@ -178,13 +245,15 @@ import { AuthService } from '../../core/services/auth.service';
 
     .stat-label {
       color: #666;
-      font-size: 14px;
+      font-size: 13px;
       margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     .stat-value {
-      color: #333;
-      font-size: 24px;
+      color: #1a1a1a;
+      font-size: 20px;
       font-weight: 700;
     }
 
@@ -196,15 +265,21 @@ import { AuthService } from '../../core/services/auth.service';
 
     .section-card {
       background: white;
+      border: 1px solid #e5e7eb;
       border-radius: 12px;
       padding: 24px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+    }
+
+    .section-card:hover {
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
     }
 
     .section-card h2 {
-      color: #333;
+      color: #1a1a1a;
       margin: 0 0 16px 0;
-      font-size: 20px;
+      font-size: 18px;
+      font-weight: 600;
     }
 
     .placeholder-text {
@@ -235,6 +310,10 @@ import { AuthService } from '../../core/services/auth.service';
 
       .dashboard-content {
         padding: 20px;
+      }
+
+      .dashboard-content h1 {
+        font-size: 24px;
       }
     }
   `]

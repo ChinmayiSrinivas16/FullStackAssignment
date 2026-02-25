@@ -13,9 +13,13 @@ import { Portfolio, PortfolioSummary } from '../../core/models/portfolio.model';
 })
 export class DashboardPage implements OnInit {
 
+<<<<<<< HEAD
   portfolios: PortfolioSummary[] = [];
   selectedPortfolioId: number | null = null;
   dashboard!: DashboardData;
+=======
+  dashboard: Dashboard | null = null;
+>>>>>>> f947157924cbe88eb7a8b43a0cad16fa73dd23a0
   loading = false;
 
   constructor(

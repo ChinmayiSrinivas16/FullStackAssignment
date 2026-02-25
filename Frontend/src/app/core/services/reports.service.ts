@@ -8,11 +8,19 @@ export class ReportsService {
 
   constructor(private api: ApiHttpClient) {}
 
-  getSummary(): Observable<any> {
-    return this.api.get(`${ENDPOINTS.REPORTS}/summary`);
+  generateReport(format: string): Observable<Blob> {
+    return this.api.post(`${ENDPOINTS.REPORTS}/generate`, { format }, { responseType: 'blob' });
   }
 
-  exportCSV(): Observable<Blob> {
-    return this.api.get(`${ENDPOINTS.REPORTS}/export`);
+  getSummary(portfolioId: number): Observable<any> {
+    return this.api.get<any>(`${ENDPOINTS.REPORTS(portfolioId)}/summary`);
+  }
+
+  exportCSV(portfolioId: number): Observable<Blob> {
+    return this.api.getBlob(`${ENDPOINTS.REPORTS(portfolioId)}/export`);
+  }
+
+  exportPDF(portfolioId: number): Observable<Blob> {
+    return this.api.getBlob(`${ENDPOINTS.REPORTS(portfolioId)}/pdf`);
   }
 }

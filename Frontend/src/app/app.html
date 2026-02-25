@@ -1,4 +1,10 @@
-<div class="app-container">
+<!-- Full Width Layout for Landing/Login/Signup -->
+<div *ngIf="!showLayout" class="full-layout">
+  <router-outlet></router-outlet>
+</div>
+
+<!-- Dashboard Layout with Sidebar -->
+<div *ngIf="showLayout" class="app-container">
 
   <!-- Sidebar Navigation -->
   <aside class="sidebar">

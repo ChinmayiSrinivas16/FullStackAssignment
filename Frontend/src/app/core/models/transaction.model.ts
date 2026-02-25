@@ -1,10 +1,39 @@
 export interface Transaction {
   id: number;
-  date: string;
-  amount: number;
-  description?: string;
+  portfolioId: number;
+  stockId: number;
   symbol: string;
-  type: 'BUY' | 'SELL';
+  companyName?: string;
+  transactionType: 'BUY' | 'SELL';
   quantity: number;
   price: number;
+  totalAmount: number;
+  brokerage?: number;
+  tax?: number;
+  transactionDate: string;
+  notes?: string;
+  isRealized: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TransactionRequest {
+  stockId?: number;
+  symbol: string;
+  transactionType: 'BUY' | 'SELL';
+  quantity: number;
+  price: number;
+  brokerage?: number;
+  tax?: number;
+  transactionDate: string;
+  notes?: string;
+}
+
+export interface TransactionUpdateRequest {
+  quantity?: number;
+  price?: number;
+  brokerage?: number;
+  tax?: number;
+  transactionDate?: string;
+  notes?: string;
 }

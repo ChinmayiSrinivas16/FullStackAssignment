@@ -15,19 +15,8 @@
           <polyline points="17 6 23 6 23 12"></polyline>
         </svg>
       </div>
-      <p class="kpi-label">Total Gain</p>
-      <p class="kpi-value positive">₹ {{ pnlData?.totalGain | number:'1.2-2' }}</p>
-    </div>
-
-    <div class="kpi-card">
-      <div class="kpi-icon icon-red">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="23 18 13.5 8.5 8.5 13.5 1 7"></polyline>
-          <polyline points="17 18 23 18 23 12"></polyline>
-        </svg>
-      </div>
-      <p class="kpi-label">Total Loss</p>
-      <p class="kpi-value negative">₹ {{ pnlData?.totalLoss | number:'1.2-2' }}</p>
+      <p class="kpi-label">Total Invested</p>
+      <p class="kpi-value">₹ {{ analytics?.totalInvested || 0 | number:'1.2-2' }}</p>
     </div>
 
     <div class="kpi-card">
@@ -37,8 +26,19 @@
           <path d="M12 6v6l4 2"></path>
         </svg>
       </div>
-      <p class="kpi-label">Win Rate</p>
-      <p class="kpi-value">{{ ((pnlData?.totalGain / (pnlData?.totalGain + pnlData?.totalLoss)) * 100) | number:'1.0-0' }}%</p>
+      <p class="kpi-label">Current Value</p>
+      <p class="kpi-value">₹ {{ analytics?.currentValue || 0 | number:'1.2-2' }}</p>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-icon icon-green">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="23 18 13.5 8.5 8.5 13.5 1 7"></polyline>
+          <polyline points="17 18 23 18 23 12"></polyline>
+        </svg>
+      </div>
+      <p class="kpi-label">Total P&L</p>
+      <p class="kpi-value" [class.positive]="(analytics?.totalGainLoss || 0) >= 0" [class.negative]="(analytics?.totalGainLoss || 0) < 0">₹ {{ analytics?.totalGainLoss || 0 | number:'1.2-2' }}</p>
     </div>
 
   </div>
@@ -46,157 +46,45 @@
   <!-- Analytics Grid -->
   <div class="analytics-grid">
 
-    <!-- Stock-wise Allocation Pie Chart -->
+    <!-- Realized vs Unrealized -->
     <div class="analytics-card">
       <div class="card-header">
-        <h2 class="card-title">Stock-wise Allocation</h2>
-        <span class="card-icon">📈</span>
-      </div>
-      <div class="pie-chart-container">
-        <svg viewBox="0 0 200 200" class="pie-chart">
-          <!-- Pie slices -->
-          <circle cx="100" cy="100" r="80" fill="none" stroke="#6366f1" stroke-width="25" stroke-dasharray="125.6 502.4" stroke-dashoffset="0"/>
-          <circle cx="100" cy="100" r="80" fill="none" stroke="#10b981" stroke-width="25" stroke-dasharray="94.2 502.4" stroke-dashoffset="-125.6"/>
-          <circle cx="100" cy="100" r="80" fill="none" stroke="#f59e0b" stroke-width="25" stroke-dasharray="78.5 502.4" stroke-dashoffset="-219.8"/>
-          <circle cx="100" cy="100" r="80" fill="none" stroke="#ef4444" stroke-width="25" stroke-dasharray="62.8 502.4" stroke-dashoffset="-298.3"/>
-          <circle cx="100" cy="100" r="80" fill="none" stroke="#8b5cf6" stroke-width="25" stroke-dasharray="141.3 502.4" stroke-dashoffset="-361.1"/>
-          <!-- Center circle for donut effect -->
-          <circle cx="100" cy="100" r="50" fill="#1e293b"/>
-          <text x="100" y="105" text-anchor="middle" font-size="20" font-weight="700" fill="#f1f5f9">5</text>
-          <text x="100" y="120" text-anchor="middle" font-size="12" fill="#94a3b8">Stocks</text>
-        </svg>
-        <div class="pie-legend">
-          <div class="pie-legend-item">
-            <div class="pie-legend-color" style="background: #6366f1;"></div>
-            <div class="pie-legend-text">
-              <span class="pie-label">Apple Inc.</span>
-              <span class="pie-percent">25%</span>
-            </div>
-          </div>
-          <div class="pie-legend-item">
-            <div class="pie-legend-color" style="background: #10b981;"></div>
-            <div class="pie-legend-text">
-              <span class="pie-label">Microsoft Corp</span>
-              <span class="pie-percent">18.8%</span>
-            </div>
-          </div>
-          <div class="pie-legend-item">
-            <div class="pie-legend-color" style="background: #f59e0b;"></div>
-            <div class="pie-legend-text">
-              <span class="pie-label">Google LLC</span>
-              <span class="pie-percent">15.6%</span>
-            </div>
-          </div>
-          <div class="pie-legend-item">
-            <div class="pie-legend-color" style="background: #ef4444;"></div>
-            <div class="pie-legend-text">
-              <span class="pie-label">Tesla Inc.</span>
-              <span class="pie-percent">12.5%</span>
-            </div>
-          </div>
-          <div class="pie-legend-item">
-            <div class="pie-legend-color" style="background: #8b5cf6;"></div>
-            <div class="pie-legend-text">
-              <span class="pie-label">Amazon.com</span>
-              <span class="pie-percent">28.1%</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Sector Allocation Pie Chart -->
-    <div class="analytics-card">
-      <div class="card-header">
-        <h2 class="card-title">Sector Allocation</h2>
-        <span class="card-icon">🏭</span>
-      </div>
-      <div class="pie-chart-container">
-        <svg viewBox="0 0 200 200" class="pie-chart">
-          <!-- Pie slices -->
-          <circle cx="100" cy="100" r="80" fill="none" stroke="#6366f1" stroke-width="25" stroke-dasharray="150.72 502.4" stroke-dashoffset="0"/>
-          <circle cx="100" cy="100" r="80" fill="none" stroke="#10b981" stroke-width="25" stroke-dasharray="125.6 502.4" stroke-dashoffset="-150.72"/>
-          <circle cx="100" cy="100" r="80" fill="none" stroke="#f59e0b" stroke-width="25" stroke-dasharray="100.48 502.4" stroke-dashoffset="-276.32"/>
-          <circle cx="100" cy="100" r="80" fill="none" stroke="#ef4444" stroke-width="25" stroke-dasharray="125.6 502.4" stroke-dashoffset="-376.8"/>
-          <!-- Center circle for donut effect -->
-          <circle cx="100" cy="100" r="50" fill="#1e293b"/>
-          <text x="100" y="105" text-anchor="middle" font-size="20" font-weight="700" fill="#f1f5f9">4</text>
-          <text x="100" y="120" text-anchor="middle" font-size="12" fill="#94a3b8">Sectors</text>
-        </svg>
-        <div class="pie-legend">
-          <div class="pie-legend-item">
-            <div class="pie-legend-color" style="background: #6366f1;"></div>
-            <div class="pie-legend-text">
-              <span class="pie-label">Technology</span>
-              <span class="pie-percent">30%</span>
-            </div>
-          </div>
-          <div class="pie-legend-item">
-            <div class="pie-legend-color" style="background: #10b981;"></div>
-            <div class="pie-legend-text">
-              <span class="pie-label">Finance</span>
-              <span class="pie-percent">25%</span>
-            </div>
-          </div>
-          <div class="pie-legend-item">
-            <div class="pie-legend-color" style="background: #f59e0b;"></div>
-            <div class="pie-legend-text">
-              <span class="pie-label">Healthcare</span>
-              <span class="pie-percent">20%</span>
-            </div>
-          </div>
-          <div class="pie-legend-item">
-            <div class="pie-legend-color" style="background: #ef4444;"></div>
-            <div class="pie-legend-text">
-              <span class="pie-label">Energy</span>
-              <span class="pie-percent">25%</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- P&L Summary Card -->
-    <div class="analytics-card">
-      <div class="card-header">
-        <h2 class="card-title">P&L Summary</h2>
+        <h2 class="card-title">Gain Analysis</h2>
         <span class="card-icon">📊</span>
       </div>
       <div class="pnl-summary">
         <div class="summary-row">
-          <span class="summary-label">Total Gain</span>
-          <span class="summary-value positive">₹ {{ pnlData?.totalGain | number:'1.2-2' }}</span>
+          <span class="summary-label">Realized Gains</span>
+          <span class="summary-value positive">₹ {{ analytics?.realizedGainLoss || 0 | number:'1.2-2' }}</span>
         </div>
         <div class="summary-row">
-          <span class="summary-label">Total Loss</span>
-          <span class="summary-value negative">₹ {{ pnlData?.totalLoss | number:'1.2-2' }}</span>
+          <span class="summary-label">Unrealized Gains</span>
+          <span class="summary-value" [class.positive]="(analytics?.unrealizedGainLoss || 0) >= 0" [class.negative]="(analytics?.unrealizedGainLoss || 0) < 0">₹ {{ analytics?.unrealizedGainLoss || 0 | number:'1.2-2' }}</span>
         </div>
         <div class="summary-row border-top">
           <span class="summary-label bold">Net P&L</span>
-          <span class="summary-value bold" [class.positive]="(pnlData?.totalGain - pnlData?.totalLoss) >= 0" [class.negative]="(pnlData?.totalGain - pnlData?.totalLoss) < 0">
-            ₹ {{ (pnlData?.totalGain - pnlData?.totalLoss) | number:'1.2-2' }}
+          <span class="summary-value bold" [class.positive]="(analytics?.totalGainLoss || 0) >= 0" [class.negative]="(analytics?.totalGainLoss || 0) < 0">
+            ₹ {{ analytics?.totalGainLoss || 0 | number:'1.2-2' }}
           </span>
         </div>
       </div>
     </div>
 
-    <!-- Top Movers Card -->
+    <!-- Top Performers -->
     <div class="analytics-card">
       <div class="card-header">
         <h2 class="card-title">Top Performing Stocks</h2>
         <span class="card-icon">🔥</span>
       </div>
       <div class="movers-list">
-        <div *ngIf="movers && movers.length > 0; else noMovers">
-          <div *ngFor="let stock of movers" class="mover-item">
+        <div *ngIf="analytics?.topPerformingStocks && analytics!.topPerformingStocks!.length > 0; else noMovers">
+          <div *ngFor="let stock of analytics?.topPerformingStocks" class="mover-item">
             <div class="mover-info">
               <span class="mover-symbol">{{ stock.symbol }}</span>
-              <span class="mover-label">Performance</span>
+              <span class="mover-label">{{ stock.companyName }}</span>
             </div>
-            <span class="mover-change" [class.positive]="stock.change >= 0" [class.negative]="stock.change < 0">
-              <span *ngIf="stock.change >= 0">▲</span>
-              <span *ngIf="stock.change < 0">▼</span>
-              {{ stock.change | number:'1.2-2' }}%
+            <span class="mover-change positive">
+              +{{ stock.gainLossPercent | number:'1.2-2' }}%
             </span>
           </div>
         </div>
@@ -307,56 +195,6 @@
     gap: 24px;
   }
 
-  .pie-chart-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-  }
-
-  .pie-chart {
-    width: 200px;
-    height: 200px;
-  }
-
-  .pie-legend {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .pie-legend-item {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-  }
-
-  .pie-legend-color {
-    width: 12px;
-    height: 12px;
-    border-radius: 3px;
-    flex-shrink: 0;
-  }
-
-  .pie-legend-text {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    flex: 1;
-  }
-
-  .pie-label {
-    font-size: 13px;
-    color: #cbd5e1;
-  }
-
-  .pie-percent {
-    font-size: 12px;
-    color: #94a3b8;
-    font-weight: 600;
-  }
-
   .analytics-card {
     background: #1e293b;
     border: 1px solid #475569;
@@ -411,12 +249,13 @@
 
   .summary-label.bold {
     font-weight: 600;
-    color: #1a1a1a;
+    color: #f1f5f9;
   }
 
   .summary-value {
     font-size: 16px;
     font-weight: 600;
+    color: #f1f5f9;
   }
 
   .summary-value.positive {

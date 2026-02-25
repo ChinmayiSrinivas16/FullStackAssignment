@@ -10,22 +10,33 @@ import { ReportsService } from '../../core/services/reports.service';
 })
 export class ReportsPage {
 
+  portfolioId: number = 1; // Default portfolio ID
   summary: any;
 
   constructor(private service: ReportsService) {}
 
   loadSummary(): void {
-    this.service.getSummary().subscribe((data: any) => {
+    this.service.getSummary(this.portfolioId).subscribe((data: any) => {
       this.summary = data;
     });
   }
 
   downloadCSV(): void {
-    this.service.exportCSV().subscribe((blob: any) => {
+    this.service.exportCSV(this.portfolioId).subscribe((blob: any) => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = 'portfolio-report.csv';
+      a.click();
+    });
+  }
+
+  downloadPDF(): void {
+    this.service.exportPDF(this.portfolioId).subscribe((blob: any) => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'portfolio-report.pdf';
       a.click();
     });
   }

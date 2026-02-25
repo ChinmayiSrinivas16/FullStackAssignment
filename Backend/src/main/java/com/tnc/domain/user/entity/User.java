@@ -1,5 +1,6 @@
 package com.tnc.domain.user.entity;
 
+import com.tnc.domain.portfolio.entity.Portfolio;
 import com.tnc.persistence.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -7,17 +8,18 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
-@Table(name = "users")
+@Table(name = "users", indexes = {
+    @Index(name = "idx_user_email", columnList = "email", unique = true)
+})
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class User extends BaseEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
 
     @Column(unique = true, nullable = false)
     private String email;
@@ -36,4 +38,8 @@ public class User extends BaseEntity {
 
     @Column(name = "role")
     private String role = "USER";
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("createdAt DESC")
+    private List<Portfolio> portfolios = new ArrayList<>();
 }

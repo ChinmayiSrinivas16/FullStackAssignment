@@ -29,14 +29,14 @@
     <div class="quote-header">
       <div class="quote-symbol">
         <h2>{{ quote.symbol }}</h2>
-        <p class="quote-subtitle">Stock Information</p>
+        <p class="quote-subtitle">{{ quote.companyName }}</p>
       </div>
       <div class="quote-price">
-        <p class="current-price">₹ {{ quote.price | number:'1.2-2' }}</p>
+        <p class="current-price">₹ {{ quote.currentPrice | number:'1.2-2' }}</p>
         <p class="price-change" [class.positive]="quote.change >= 0" [class.negative]="quote.change < 0">
           <span *ngIf="quote.change >= 0">▲</span>
           <span *ngIf="quote.change < 0">▼</span>
-          {{ quote.change | number:'1.2-2' }}%
+          {{ quote.change | number:'1.2-2' }} ({{ quote.changePercent | number:'1.2-2' }}%)
         </p>
       </div>
     </div>
@@ -44,11 +44,11 @@
     <div class="quote-grid">
       <div class="quote-item">
         <span class="label">High</span>
-        <span class="value">₹ {{ quote.high | number:'1.2-2' }}</span>
+        <span class="value">₹ {{ quote.dayHigh || 0 | number:'1.2-2' }}</span>
       </div>
       <div class="quote-item">
         <span class="label">Low</span>
-        <span class="value">₹ {{ quote.low | number:'1.2-2' }}</span>
+        <span class="value">₹ {{ quote.dayLow || 0 | number:'1.2-2' }}</span>
       </div>
       <div class="quote-item">
         <span class="label">Volume</span>

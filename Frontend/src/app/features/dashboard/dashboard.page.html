@@ -1,18 +1,50 @@
 <div class="dashboard-container">
 
-  <!-- Welcome Header -->
-  <div class="welcome-section">
-    <h1 class="welcome-title">Investment Dashboard</h1>
-    <p class="welcome-subtitle">Manage your portfolio and track market opportunities</p>
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-left">
+      <h1 class="page-title">Dashboard</h1>
+      <p class="page-subtitle">Your portfolio overview</p>
+    </div>
+    <div class="header-right">
+      <!-- Portfolio Selector -->
+      <select 
+        *ngIf="portfolios.length > 0"
+        [(ngModel)]="selectedPortfolioId" 
+        (ngModelChange)="onPortfolioChange()"
+        class="portfolio-select">
+        <option *ngFor="let p of portfolios" [value]="p.id">{{ p.portfolioName }}</option>
+      </select>
+      <!-- Refresh Button -->
+      <button 
+        (click)="refreshPrices()"
+        [disabled]="loading"
+        class="refresh-btn">
+        <span>🔄</span>
+        <span>Refresh</span>
+      </button>
+    </div>
   </div>
 
-  <!-- KPI Cards Grid -->
-  <div class="kpi-grid">
+  <!-- No Portfolio State -->
+  <div *ngIf="portfolios.length === 0 && !loading" class="empty-state">
+    <div class="empty-icon">📊</div>
+    <h2 class="empty-title">No Portfolio Found</h2>
+    <p class="empty-text">Create your first portfolio to get started!</p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Portfolio Summary Cards -->
+  <div *ngIf="dashboard && !loading" class="kpi-grid">
 
     <!-- Total Investment Card -->
     <div class="kpi-card">
       <div class="kpi-header">
-        <p class="kpi-label">Total Investment</p>
+        <p class="kpi-label">Total Invested</p>
         <div class="kpi-icon icon-blue">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="12 1 12 23"></polyline>
@@ -20,8 +52,8 @@
           </svg>
         </div>
       </div>
-      <h2 class="kpi-value" *ngIf="dashboard">{{ dashboard.totalInvestment | currency:'INR':'₹':'1.0-0' }}</h2>
-      <p class="kpi-footer">Capital invested</p>
+      <h2 class="kpi-value">{{ dashboard.totalInvested | currency:'INR':'₹':'1.0-0' }}</h2>
+      <p class="kpi-footer">{{ dashboard.totalStocks }} stocks in portfolio</p>
     </div>
 
     <!-- Current Value Card -->
@@ -36,38 +68,39 @@
           </svg>
         </div>
       </div>
-      <h2 class="kpi-value" *ngIf="dashboard">{{ dashboard.currentValue | currency:'INR':'₹':'1.0-0' }}</h2>
-      <p class="kpi-footer">Current market value</p>
+      <h2 class="kpi-value">{{ dashboard.currentValue | currency:'INR':'₹':'1.0-0' }}</h2>
+      <p class="kpi-footer">Live market value</p>
     </div>
 
     <!-- Total P&L Card -->
-    <div class="kpi-card" [class.pnl-positive]="(dashboard?.totalPnL ?? 0) >= 0" [class.pnl-negative]="(dashboard?.totalPnL ?? 0) < 0">
+    <div class="kpi-card" [class.pnl-positive]="dashboard.totalGainLoss >= 0" [class.pnl-negative]="dashboard.totalGainLoss < 0">
       <div class="kpi-header">
         <p class="kpi-label">Total P&L</p>
-        <div class="kpi-icon" [class.icon-success]="(dashboard?.totalPnL ?? 0) >= 0" [class.icon-danger]="(dashboard?.totalPnL ?? 0) < 0">
-          <svg *ngIf="(dashboard?.totalPnL ?? 0) >= 0" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <div class="kpi-icon" [class.icon-success]="dashboard.totalGainLoss >= 0" [class.icon-danger]="dashboard.totalGainLoss < 0">
+          <svg *ngIf="dashboard.totalGainLoss >= 0" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="23 6 13.5 15.5 8.5 10.5 1 17"></polyline>
             <polyline points="17 6 23 6 23 12"></polyline>
           </svg>
-          <svg *ngIf="(dashboard?.totalPnL ?? 0) < 0" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg *ngIf="dashboard.totalGainLoss < 0" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="23 18 13.5 8.5 8.5 13.5 1 7"></polyline>
             <polyline points="17 18 23 18 23 12"></polyline>
           </svg>
         </div>
       </div>
-      <h2 class="kpi-value pnl-value">
-        <span *ngIf="(dashboard?.totalPnL ?? 0) >= 0">+</span>{{ dashboard?.totalPnL | currency:'INR':'₹':'1.0-0' }}
+      <h2 class="kpi-value">
+        <span *ngIf="dashboard.totalGainLoss >= 0">+</span>{{ dashboard.totalGainLoss | currency:'INR':'₹':'1.0-0' }}
+        <span class="kpi-percent">({{ dashboard.totalGainLossPercent | number:'1.1-1' }}%)</span>
       </h2>
       <p class="kpi-footer">
-        <span *ngIf="(dashboard?.totalPnL ?? 0) >= 0">Profit</span>
-        <span *ngIf="(dashboard?.totalPnL ?? 0) < 0">Loss</span>
+        <span class="text-green">{{ dashboard.profitableStocks }} profitable</span> | 
+        <span class="text-red">{{ dashboard.lossStocks }} loss</span>
       </p>
     </div>
 
     <!-- Return % Card -->
     <div class="kpi-card">
       <div class="kpi-header">
-        <p class="kpi-label">Total Return %</p>
+        <p class="kpi-label">Return %</p>
         <div class="kpi-icon icon-purple">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="23 6 13.5 15.5 8.5 10.5 1 17"></polyline>
@@ -75,461 +108,113 @@
           </svg>
         </div>
       </div>
-      <h2 class="kpi-value" *ngIf="dashboard">{{ ((dashboard.currentValue - dashboard.totalInvestment) / dashboard.totalInvestment * 100) | number:'1.2-2' }}%</h2>
-      <p class="kpi-footer">Annual return</p>
+      <h2 class="kpi-value">{{ dashboard.totalGainLossPercent | number:'1.2-2' }}%</h2>
+      <p class="kpi-footer">Total return</p>
     </div>
 
   </div>
 
-  <!-- Market Watch Section -->
-  <div class="main-grid">
-
-    <!-- Left Column - Watchlist, Funds, Collections -->
-    <div class="left-column">
-
-      <!-- Watchlist Section -->
-      <div class="card-section">
-        <div class="section-header">
-          <h3 class="section-title">Your Watchlist</h3>
-          <button class="view-all-btn">View All →</button>
-        </div>
-        <div class="watchlist-items">
-          <div class="watchlist-item">
-            <div class="watchlist-info">
-              <p class="watchlist-symbol">RELIANCE</p>
-              <p class="watchlist-name">Reliance Industries</p>
-            </div>
-            <div class="watchlist-price">
-              <p class="price">₹ 2,850.50</p>
-              <span class="change positive">↑ +1.2%</span>
-            </div>
-          </div>
-          <div class="watchlist-item">
-            <div class="watchlist-info">
-              <p class="watchlist-symbol">TCS</p>
-              <p class="watchlist-name">Tata Consultancy Services</p>
-            </div>
-            <div class="watchlist-price">
-              <p class="price">₹ 3,650.25</p>
-              <span class="change negative">↓ -0.8%</span>
-            </div>
-          </div>
-          <div class="watchlist-item">
-            <div class="watchlist-info">
-              <p class="watchlist-symbol">INFY</p>
-              <p class="watchlist-name">Infosys Limited</p>
-            </div>
-            <div class="watchlist-price">
-              <p class="price">₹ 1,420.75</p>
-              <span class="change positive">↑ +2.3%</span>
-            </div>
-          </div>
-          <div class="watchlist-item">
-            <div class="watchlist-info">
-              <p class="watchlist-symbol">HDFCBANK</p>
-              <p class="watchlist-name">HDFC Bank Limited</p>
-            </div>
-            <div class="watchlist-price">
-              <p class="price">₹ 2,180.50</p>
-              <span class="change positive">↑ +2.1%</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Popular Funds Section -->
-      <div class="card-section">
-        <div class="section-header">
-          <h3 class="section-title">Popular Funds</h3>
-          <button class="view-all-btn">View All →</button>
-        </div>
-        <div class="funds-grid">
-          <div class="fund-card">
-            <div class="fund-name">Axis Bluechip Fund</div>
-            <div class="fund-stats">
-              <div class="stat">
-                <p class="stat-label">1Y Return</p>
-                <p class="stat-value">18.5%</p>
-              </div>
-              <div class="stat">
-                <p class="stat-label">AUM</p>
-                <p class="stat-value">₹ 45K Cr</p>
-              </div>
-            </div>
-          </div>
-          <div class="fund-card">
-            <div class="fund-name">ICICI Growth Fund</div>
-            <div class="fund-stats">
-              <div class="stat">
-                <p class="stat-label">1Y Return</p>
-                <p class="stat-value">16.2%</p>
-              </div>
-              <div class="stat">
-                <p class="stat-label">AUM</p>
-                <p class="stat-value">₹ 32K Cr</p>
-              </div>
-            </div>
-          </div>
-          <div class="fund-card">
-            <div class="fund-name">Kotak Emerging Fund</div>
-            <div class="fund-stats">
-              <div class="stat">
-                <p class="stat-label">1Y Return</p>
-                <p class="stat-value">22.8%</p>
-              </div>
-              <div class="stat">
-                <p class="stat-label">AUM</p>
-                <p class="stat-value">₹ 28K Cr</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Collections -->
-      <div class="card-section">
-        <div class="section-header">
-          <h3 class="section-title">Fund Collections</h3>
-        </div>
-        <div class="collections-grid">
-          <div class="collection-card">
-            <div class="collection-badge high-return">High Return</div>
-            <p class="collection-title">Top Performing Funds</p>
-            <p class="collection-desc">25+ funds with 15%+ returns</p>
-            <button class="collection-btn">Explore →</button>
-          </div>
-          <div class="collection-card">
-            <div class="collection-badge dividend">Gold ETFs</div>
-            <p class="collection-title">Gold ETFs</p>
-            <p class="collection-desc">Safe diversification options</p>
-            <button class="collection-btn">Explore →</button>
-          </div>
-          <div class="collection-card">
-            <div class="collection-badge silver">Silver Funds</div>
-            <p class="collection-title">Commodity Funds</p>
-            <p class="collection-desc">Precious metals exposure</p>
-            <button class="collection-btn">Explore →</button>
-          </div>
-          <div class="collection-card">
-            <div class="collection-badge cap">Large Cap</div>
-            <p class="collection-title">Stability Focus</p>
-            <p class="collection-desc">Large-cap stocks only</p>
-            <button class="collection-btn">Explore →</button>
-          </div>
-        </div>
-      </div>
-
+  <!-- Holdings Section -->
+  <div *ngIf="dashboard && dashboard.holdings && dashboard.holdings.length > 0" class="holdings-section">
+    
+    <!-- Header -->
+    <div class="section-header">
+      <h3 class="section-title">📈 Your Holdings</h3>
     </div>
 
-    <!-- Right Column - Trading Screens, Sectors, News -->
-    <div class="right-column">
+    <!-- Table -->
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Stock</th>
+            <th>Qty</th>
+            <th>Avg Price</th>
+            <th>Current</th>
+            <th>Invested</th>
+            <th>Value</th>
+            <th>P&L</th>
+          </tr>
+        </thead>
 
-      <!-- Trading Screens (Most Important) -->
-      <div class="card-section">
-        <div class="section-header">
-          <h3 class="section-title">Trading Screens</h3>
-          <div class="live-badge">
-            <span class="pulse"></span>
-            <span>Live</span>
-          </div>
-        </div>
-        <div class="trading-grid">
-          <div class="trading-screen">
-            <p class="screen-label">Top Intra Day Gainers</p>
-            <div class="stock-list">
-              <div class="stock-item">
-                <span class="stock-symbol">SUDARSANTEX</span>
-                <span class="stock-change positive">+12.5%</span>
-              </div>
-              <div class="stock-item">
-                <span class="stock-symbol">HFCL</span>
-                <span class="stock-change positive">+10.2%</span>
-              </div>
-              <div class="stock-item">
-                <span class="stock-symbol">IRCTC</span>
-                <span class="stock-change positive">+8.75%</span>
-              </div>
-              <div class="stock-item">
-                <span class="stock-symbol">MARUTI</span>
-                <span class="stock-change positive">+6.8%</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="trading-screen">
-            <p class="screen-label">Volume Shockers</p>
-            <div class="stock-list">
-              <div class="stock-item">
-                <span class="stock-symbol">ADANIPOWER</span>
-                <span class="volume">↑ 45.2M</span>
-              </div>
-              <div class="stock-item">
-                <span class="stock-symbol">BANKNIFTY</span>
-                <span class="volume">↑ 32.1M</span>
-              </div>
-              <div class="stock-item">
-                <span class="stock-symbol">SBIN</span>
-                <span class="volume">↑ 28.5M</span>
-              </div>
-              <div class="stock-item">
-                <span class="stock-symbol">BPCL</span>
-                <span class="volume">↑ 22.3M</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Trending Sectors -->
-      <div class="card-section">
-        <div class="section-header">
-          <h3 class="section-title">Trending Sectors Today</h3>
-          <button class="view-all-btn">View All →</button>
-        </div>
-        <div class="sectors-list">
-          <div class="sector-item">
-            <div class="sector-info">
-              <p class="sector-name">IT & Software</p>
-              <p class="sector-comp">25 stocks</p>
-            </div>
-            <div class="sector-stats">
-              <p class="sector-return positive">+2.3%</p>
-              <div class="sector-bar">
-                <div class="bar-fill positive" style="width: 72%"></div>
-              </div>
-            </div>
-          </div>
-          <div class="sector-item">
-            <div class="sector-info">
-              <p class="sector-name">Financials</p>
-              <p class="sector-comp">18 stocks</p>
-            </div>
-            <div class="sector-stats">
-              <p class="sector-return positive">+1.8%</p>
-              <div class="sector-bar">
-                <div class="bar-fill positive" style="width: 65%"></div>
-              </div>
-            </div>
-          </div>
-          <div class="sector-item">
-            <div class="sector-info">
-              <p class="sector-name">Energy & Power</p>
-              <p class="sector-comp">12 stocks</p>
-            </div>
-            <div class="sector-stats">
-              <p class="sector-return positive">+1.2%</p>
-              <div class="sector-bar">
-                <div class="bar-fill positive" style="width: 58%"></div>
-              </div>
-            </div>
-          </div>
-          <div class="sector-item">
-            <div class="sector-info">
-              <p class="sector-name">Healthcare</p>
-              <p class="sector-comp">22 stocks</p>
-            </div>
-            <div class="sector-stats">
-              <p class="sector-return negative">-0.5%</p>
-              <div class="sector-bar">
-                <div class="bar-fill negative" style="width: 42%"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Stocks in News -->
-      <div class="card-section">
-        <div class="section-header">
-          <h3 class="section-title">Stocks in News</h3>
-          <button class="view-all-btn">View All →</button>
-        </div>
-        <div class="news-list">
-          <div class="news-item">
-            <div class="news-symbol">RELIANCE</div>
-            <div class="news-content">
-              <p class="news-headline">Q3 Results: Strong profit growth reported</p>
-              <p class="news-time">2 hours ago</p>
-            </div>
-          </div>
-          <div class="news-item">
-            <div class="news-symbol">TCS</div>
-            <div class="news-content">
-              <p class="news-headline">Announces Rs 18,000 Cr buyback program</p>
-              <p class="news-time">4 hours ago</p>
-            </div>
-          </div>
-          <div class="news-item">
-            <div class="news-symbol">INFY</div>
-            <div class="news-content">
-              <p class="news-headline">Expands R&D center in Bengaluru</p>
-              <p class="news-time">6 hours ago</p>
-            </div>
-          </div>
-          <div class="news-item">
-            <div class="news-symbol">HDFCBANK</div>
-            <div class="news-content">
-              <p class="news-headline">Launches new digital banking features</p>
-              <p class="news-time">8 hours ago</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
+        <tbody>
+          <tr *ngFor="let holding of dashboard.holdings">
+            <td>
+              <div class="stock-name">{{ holding.symbol }}</div>
+              <div class="stock-company">{{ holding.companyName }}</div>
+            </td>
+            <td>{{ holding.quantity }}</td>
+            <td>{{ holding.averageBuyPrice | currency:'INR':'₹':'1.0-2' }}</td>
+            <td>{{ holding.currentPrice | currency:'INR':'₹':'1.0-2' }}</td>
+            <td>{{ holding.investmentAmount | currency:'INR':'₹':'1.0-0' }}</td>
+            <td>{{ holding.currentValue | currency:'INR':'₹':'1.0-0' }}</td>
+            <td>
+              <span [class.text-green]="holding.gainLoss >= 0" [class.text-red]="holding.gainLoss < 0">
+                {{ holding.gainLoss | currency:'INR':'₹':'1.0-0' }}
+                <span class="percent">({{ holding.gainLossPercent | number:'1.1-1' }}%)</span>
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
   </div>
 
-  <!-- Products and Tools -->
-  <div class="products-tools-section">
-    <h3 class="products-title">Products & Tools</h3>
-    <div class="products-grid">
-      <div class="product-card">
-        <div class="product-icon">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="3" cy="12" r="1"></circle>
-            <circle cx="9" cy="12" r="1"></circle>
-            <circle cx="15" cy="12" r="1"></circle>
-            <path d="M3 12h6"></path>
-            <path d="M9 12h6"></path>
-            <path d="M15 12h6"></path>
-            <rect x="2" y="2" width="20" height="20" rx="2"></rect>
-          </svg>
-        </div>
-        <p class="product-name">Portfolio Analyzer</p>
-        <p class="product-desc">Analyze your portfolio composition</p>
+  <!-- No Holdings State -->
+  <div *ngIf="dashboard && (!dashboard.holdings || dashboard.holdings.length === 0) && !loading" class="empty-state">
+    <div class="empty-icon">📈</div>
+    <h2 class="empty-title">No Holdings Yet</h2>
+    <p class="empty-text">Add your first transaction to see your holdings!</p>
+  </div>
+
+  <!-- Top Movers Section -->
+  <div *ngIf="dashboard" class="movers-grid">
+    
+    <!-- Top Gainers -->
+    <div class="mover-card">
+      <div class="mover-header">
+        <h3 class="mover-title text-green">📈 Top Gainers</h3>
       </div>
-      <div class="product-card">
-        <div class="product-icon">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="23 6 13.5 15.5 8.5 10.5 1 17"></polyline>
-            <polyline points="17 6 23 6 23 12"></polyline>
-            <line x1="1" y1="1" x2="23" y2="1"></line>
-            <line x1="1" y1="23" x2="23" y2="23"></line>
-          </svg>
+      <div class="mover-list">
+        <div *ngFor="let stock of dashboard.topGainers" class="mover-item">
+          <div class="mover-info">
+            <div class="mover-symbol">{{ stock.symbol }}</div>
+            <div class="mover-company">{{ stock.companyName }}</div>
+          </div>
+          <div class="mover-price">
+            <div class="price">{{ stock.currentPrice | currency:'INR':'₹':'1.0-2' }}</div>
+            <div class="change text-green">+{{ stock.changePercent | number:'1.1-1' }}%</div>
+          </div>
         </div>
-        <p class="product-name">Stock Screener</p>
-        <p class="product-desc">Find stocks based on criteria</p>
-      </div>
-      <div class="product-card">
-        <div class="product-icon">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="13" r="8"></circle>
-            <path d="M12 9v8"></path>
-            <path d="M8 13h8"></path>
-            <path d="M12 1v4"></path>
-            <path d="M4.22 4.22l2.83 2.83"></path>
-            <path d="M19.78 4.22l-2.83 2.83"></path>
-            <path d="M19.78 19.78l-2.83-2.83"></path>
-            <path d="M4.22 19.78l2.83-2.83"></path>
-          </svg>
+        <div *ngIf="!dashboard.topGainers || dashboard.topGainers.length === 0" class="no-data">
+          No gainers yet
         </div>
-        <p class="product-name">Goal Planner</p>
-        <p class="product-desc">Plan your investment goals</p>
-      </div>
-      <div class="product-card">
-        <div class="product-icon">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-            <circle cx="9" cy="10" r="1"></circle>
-            <circle cx="12" cy="10" r="1"></circle>
-            <circle cx="15" cy="10" r="1"></circle>
-          </svg>
-        </div>
-        <p class="product-name">Research Hub</p>
-        <p class="product-desc">Expert market analysis</p>
-      </div>
-      <div class="product-card">
-        <div class="product-icon">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-            <circle cx="12" cy="3" r="1"></circle>
-          </svg>
-        </div>
-        <p class="product-name">Alerts & Notifications</p>
-        <p class="product-desc">Stay updated with price alerts</p>
-      </div>
-      <div class="product-card">
-        <div class="product-icon">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
-            <line x1="12" y1="18" x2="12.01" y2="18"></line>
-          </svg>
-        </div>
-        <p class="product-name">Mobile Trading</p>
-        <p class="product-desc">Trade on the go</p>
       </div>
     </div>
 
-    <!-- Monthly P&L Trends -->
-    <div class="card-section monthly-pnl">
-      <div class="section-header">
-        <h3 class="section-title">Monthly P&L Trends</h3>
-        <button class="view-all-btn">Last 12 Months</button>
+    <!-- Top Losers -->
+    <div class="mover-card">
+      <div class="mover-header">
+        <h3 class="mover-title text-red">📉 Top Losers</h3>
       </div>
-      <div class="chart-container">
-        <div class="bar-chart">
-          <svg viewBox="0 0 900 350" class="chart-svg">
-            <!-- Y-Axis -->
-            <line x1="80" y1="30" x2="80" y2="280" stroke="#475569" stroke-width="2"/>
-            <!-- X-Axis -->
-            <line x1="80" y1="280" x2="880" y2="280" stroke="#475569" stroke-width="2"/>
-            
-            <!-- Y-Axis Labels -->
-            <text x="70" y="290" font-size="12" fill="#94a3b8" text-anchor="end">₹0</text>
-            <text x="70" y="230" font-size="12" fill="#94a3b8" text-anchor="end">₹5K</text>
-            <text x="70" y="170" font-size="12" fill="#94a3b8" text-anchor="end">₹10K</text>
-            <text x="70" y="110" font-size="12" fill="#94a3b8" text-anchor="end">₹15K</text>
-            <text x="70" y="50" font-size="12" fill="#94a3b8" text-anchor="end">₹20K</text>
-            
-            <!-- Grid Lines -->
-            <line x1="80" y1="230" x2="880" y2="230" stroke="#334155" stroke-width="1" stroke-dasharray="5,5" opacity="0.3"/>
-            <line x1="80" y1="170" x2="880" y2="170" stroke="#334155" stroke-width="1" stroke-dasharray="5,5" opacity="0.3"/>
-            <line x1="80" y1="110" x2="880" y2="110" stroke="#334155" stroke-width="1" stroke-dasharray="5,5" opacity="0.3"/>
-            <line x1="80" y1="50" x2="880" y2="50" stroke="#334155" stroke-width="1" stroke-dasharray="5,5" opacity="0.3"/>
-            
-            <!-- Bars -->
-            <rect x="95" y="210" width="28" height="70" fill="#6366f1" rx="4"/>
-            <rect x="128" y="190" width="28" height="90" fill="#6366f1" rx="4"/>
-            <rect x="161" y="170" width="28" height="110" fill="#6366f1" rx="4"/>
-            <rect x="194" y="195" width="28" height="85" fill="#6366f1" rx="4"/>
-            <rect x="227" y="145" width="28" height="135" fill="#10b981" rx="4"/>
-            <rect x="260" y="120" width="28" height="160" fill="#10b981" rx="4"/>
-            <rect x="293" y="155" width="28" height="125" fill="#10b981" rx="4"/>
-            <rect x="326" y="130" width="28" height="150" fill="#10b981" rx="4"/>
-            <rect x="359" y="105" width="28" height="175" fill="#10b981" rx="4"/>
-            <rect x="392" y="165" width="28" height="115" fill="#10b981" rx="4"/>
-            <rect x="425" y="140" width="28" height="140" fill="#10b981" rx="4"/>
-            <rect x="458" y="95" width="28" height="185" fill="#10b981" rx="4"/>
-            
-            <!-- X-Axis Labels -->
-            <text x="109" y="305" font-size="12" fill="#94a3b8" text-anchor="middle">Jan</text>
-            <text x="142" y="305" font-size="12" fill="#94a3b8" text-anchor="middle">Feb</text>
-            <text x="175" y="305" font-size="12" fill="#94a3b8" text-anchor="middle">Mar</text>
-            <text x="208" y="305" font-size="12" fill="#94a3b8" text-anchor="middle">Apr</text>
-            <text x="241" y="305" font-size="12" fill="#94a3b8" text-anchor="middle">May</text>
-            <text x="274" y="305" font-size="12" fill="#94a3b8" text-anchor="middle">Jun</text>
-            <text x="307" y="305" font-size="12" fill="#94a3b8" text-anchor="middle">Jul</text>
-            <text x="340" y="305" font-size="12" fill="#94a3b8" text-anchor="middle">Aug</text>
-            <text x="373" y="305" font-size="12" fill="#94a3b8" text-anchor="middle">Sep</text>
-            <text x="406" y="305" font-size="12" fill="#94a3b8" text-anchor="middle">Oct</text>
-            <text x="439" y="305" font-size="12" fill="#94a3b8" text-anchor="middle">Nov</text>
-            <text x="472" y="305" font-size="12" fill="#94a3b8" text-anchor="middle">Dec</text>
-          </svg>
+      <div class="mover-list">
+        <div *ngFor="let stock of dashboard.topLosers" class="mover-item">
+          <div class="mover-info">
+            <div class="mover-symbol">{{ stock.symbol }}</div>
+            <div class="mover-company">{{ stock.companyName }}</div>
+          </div>
+          <div class="mover-price">
+            <div class="price">{{ stock.currentPrice | currency:'INR':'₹':'1.0-2' }}</div>
+            <div class="change text-red">{{ stock.changePercent | number:'1.1-1' }}%</div>
+          </div>
         </div>
-        <div class="chart-legend">
-          <div class="legend-item">
-            <div class="legend-color" style="background: #6366f1;"></div>
-            <span>Loss</span>
-          </div>
-          <div class="legend-item">
-            <div class="legend-color" style="background: #10b981;"></div>
-            <span>Profit</span>
-          </div>
+        <div *ngIf="!dashboard.topLosers || dashboard.topLosers.length === 0" class="no-data">
+          No losers yet
         </div>
       </div>
     </div>
+
   </div>
 
 </div>
@@ -538,26 +223,117 @@
   .dashboard-container {
     display: flex;
     flex-direction: column;
-    gap: 32px;
+    gap: 24px;
   }
 
-  .welcome-section {
-    padding-bottom: 12px;
+  .header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 
-  .welcome-title {
-    font-size: 32px;
+  .header-left {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .page-title {
+    font-size: 28px;
     font-weight: 700;
     color: #f1f5f9;
-    margin-bottom: 8px;
+    margin: 0;
   }
 
-  .welcome-subtitle {
-    font-size: 15px;
-    color: #cbd5e1;
+  .page-subtitle {
+    font-size: 14px;
+    color: #94a3b8;
+    margin: 4px 0 0;
   }
 
-  /* KPI Grid */
+  .header-right {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .portfolio-select {
+    padding: 10px 16px;
+    background: #1e293b;
+    border: 1px solid #475569;
+    border-radius: 8px;
+    color: #f1f5f9;
+    font-size: 14px;
+  }
+
+  .refresh-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #6366f1;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .refresh-btn:hover:not(:disabled) {
+    background: #818cf8;
+  }
+
+  .refresh-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .empty-state {
+    background: #1e293b;
+    border: 1px solid #475569;
+    border-radius: 12px;
+    padding: 48px;
+    text-align: center;
+  }
+
+  .empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+  }
+
+  .empty-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #f1f5f9;
+    margin: 0 0 8px;
+  }
+
+  .empty-text {
+    font-size: 14px;
+    color: #94a3b8;
+    margin: 0;
+  }
+
+  .loading-state {
+    display: flex;
+    justify-content: center;
+    padding: 48px;
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #475569;
+    border-top-color: #6366f1;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
   .kpi-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -569,13 +345,12 @@
     border: 1px solid #475569;
     border-radius: 12px;
     padding: 24px;
-    transition: all 0.3s ease;
+    transition: all 0.3s;
   }
 
   .kpi-card:hover {
-    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.2);
-    transform: translateY(-4px);
-    border-color: #6366f1;
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.15);
+    transform: translateY(-2px);
   }
 
   .kpi-header {
@@ -590,89 +365,61 @@
     color: #94a3b8;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    margin: 0;
   }
 
   .kpi-icon {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
-  .icon-blue {
-    background: rgba(99, 102, 241, 0.15);
-    color: #818cf8;
-  }
-
-  .icon-green {
-    background: rgba(16, 185, 129, 0.15);
-    color: #86efac;
-  }
-
-  .icon-purple {
-    background: rgba(168, 85, 247, 0.15);
-    color: #d8b4fe;
-  }
-
-  .icon-success {
-    background: rgba(16, 185, 129, 0.15);
-    color: #86efac;
-  }
+  .icon-blue { background: rgba(99, 102, 241, 0.15); color: #818cf8; }
+  .icon-green { background: rgba(16, 185, 129, 0.15); color: #86efac; }
+  .icon-purple { background: rgba(168, 85, 247, 0.15); color: #d8b4fe; }
+  .icon-success { background: rgba(16, 185, 129, 0.15); color: #86efac; }
+  .icon-danger { background: rgba(239, 68, 68, 0.15); color: #fca5a5; }
 
   .kpi-value {
-    font-size: 28px;
+    font-size: 24px;
     font-weight: 700;
     color: #f1f5f9;
-    margin: 12px 0;
+    margin: 8px 0;
   }
 
-  .pnl-positive {
-    color: #86efac;
+  .kpi-percent {
+    font-size: 14px;
+    font-weight: 500;
+    margin-left: 4px;
   }
 
   .kpi-footer {
     font-size: 12px;
     color: #94a3b8;
-    border-top: 1px solid #475569;
+    margin: 8px 0 0;
     padding-top: 12px;
+    border-top: 1px solid #334155;
   }
 
-  /* Main Grid */
-  .main-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-  }
+  .pnl-positive .kpi-value { color: #86efac; }
+  .pnl-negative .kpi-value { color: #fca5a5; }
 
-  .left-column,
-  .right-column {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-  }
+  .text-green { color: #86efac; }
+  .text-red { color: #fca5a5; }
 
-  /* Card Section */
-  .card-section {
+  .holdings-section {
     background: #1e293b;
     border: 1px solid #475569;
     border-radius: 12px;
-    padding: 24px;
-    transition: all 0.3s ease;
-  }
-
-  .card-section:hover {
-    border-color: #6366f1;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+    overflow: hidden;
   }
 
   .section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+    padding: 20px 24px;
+    border-bottom: 1px solid #334155;
   }
 
   .section-title {
@@ -682,539 +429,124 @@
     margin: 0;
   }
 
-  .view-all-btn {
-    background: transparent;
-    border: none;
-    color: #6366f1;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-
-  .view-all-btn:hover {
-    color: #818cf8;
-  }
-
-  /* Watchlist */
-  .watchlist-items {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .watchlist-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px;
-    background: #334155;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-  }
-
-  .watchlist-item:hover {
-    background: #475569;
-  }
-
-  .watchlist-info {
-    flex: 1;
-  }
-
-  .watchlist-symbol {
-    font-size: 13px;
-    font-weight: 600;
-    color: #f1f5f9;
-    margin: 0;
-  }
-
-  .watchlist-name {
-    font-size: 11px;
-    color: #94a3b8;
-    margin: 4px 0 0;
-  }
-
-  .watchlist-price {
-    text-align: right;
-  }
-
-  .watchlist-price .price {
-    font-size: 13px;
-    font-weight: 600;
-    color: #f1f5f9;
-    margin: 0;
-  }
-
-  .change {
-    display: inline-block;
-    font-size: 11px;
-    font-weight: 600;
-    margin-top: 4px;
-  }
-
-  .change.positive {
-    color: #86efac;
-  }
-
-  .change.negative {
-    color: #fca5a5;
-  }
-
-  /* Popular Funds */
-  .funds-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-  }
-
-  .fund-card {
-    background: #334155;
-    border-radius: 8px;
-    padding: 12px;
-  }
-
-  .fund-name {
-    font-size: 12px;
-    font-weight: 600;
-    color: #f1f5f9;
-    margin-bottom: 8px;
-    line-height: 1.3;
-  }
-
-  .fund-stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-
-  .stat {
-    text-align: center;
-  }
-
-  .stat-label {
-    font-size: 10px;
-    color: #94a3b8;
-    margin: 0;
-  }
-
-  .stat-value {
-    font-size: 13px;
-    font-weight: 700;
-    color: #86efac;
-    margin: 2px 0 0;
-  }
-
-  /* Collections */
-  .collections-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-  }
-
-  .collection-card {
-    background: #334155;
-    border-radius: 8px;
-    padding: 12px;
-  }
-
-  .collection-badge {
-    display: inline-block;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 4px 8px;
-    border-radius: 4px;
-    margin-bottom: 8px;
-    text-transform: uppercase;
-  }
-
-  .collection-badge.high-return {
-    background: rgba(239, 68, 68, 0.15);
-    color: #fca5a5;
-  }
-
-  .collection-badge.dividend {
-    background: rgba(99, 102, 241, 0.15);
-    color: #bfdbfe;
-  }
-
-  .collection-badge.silver {
-    background: rgba(168, 85, 247, 0.15);
-    color: #d8b4fe;
-  }
-
-  .collection-badge.cap {
-    background: rgba(16, 185, 129, 0.15);
-    color: #86efac;
-  }
-
-  .collection-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: #f1f5f9;
-    margin: 8px 0 4px;
-  }
-
-  .collection-desc {
-    font-size: 11px;
-    color: #94a3b8;
-    margin: 0 0 8px;
-  }
-
-  .collection-btn {
-    width: 100%;
-    padding: 6px 8px;
-    background: #475569;
-    border: none;
-    color: #f1f5f9;
-    border-radius: 6px;
-    font-size: 11px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-
-  .collection-btn:hover {
-    background: #6366f1;
-  }
-
-  /* Trading Screens */
-  .live-badge {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    background: rgba(16, 185, 129, 0.15);
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    color: #86efac;
-    border: 1px solid rgba(16, 185, 129, 0.3);
-  }
-
-  .pulse {
-    width: 6px;
-    height: 6px;
-    background: #16a34a;
-    border-radius: 50%;
-    animation: pulse-animation 2s infinite;
-  }
-
-  @keyframes pulse-animation {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.6; transform: scale(1.2); }
-  }
-
-  .trading-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-  }
-
-  .trading-screen {
-    background: #334155;
-    border-radius: 8px;
-    padding: 12px;
-  }
-
-  .screen-label {
-    font-size: 12px;
-    font-weight: 600;
-    color: #f1f5f9;
-    margin: 0 0 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .stock-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .stock-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px;
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 6px;
-  }
-
-  .stock-symbol {
-    font-size: 11px;
-    font-weight: 700;
-    color: #f1f5f9;
-  }
-
-  .stock-change,
-  .volume {
-    font-size: 11px;
-    font-weight: 600;
-  }
-
-  .stock-change.positive {
-    color: #86efac;
-  }
-
-  .volume {
-    color: #818cf8;
-  }
-
-  /* Sectors */
-  .sectors-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .sector-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px;
-    background: #334155;
-    border-radius: 8px;
-  }
-
-  .sector-info {
-    flex: 1;
-  }
-
-  .sector-name {
-    font-size: 13px;
-    font-weight: 600;
-    color: #f1f5f9;
-    margin: 0;
-  }
-
-  .sector-comp {
-    font-size: 11px;
-    color: #94a3b8;
-    margin: 2px 0 0;
-  }
-
-  .sector-stats {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 100px;
-  }
-
-  .sector-return {
-    font-size: 12px;
-    font-weight: 700;
-    min-width: 40px;
-    text-align: right;
-  }
-
-  .sector-return.positive {
-    color: #86efac;
-  }
-
-  .sector-return.negative {
-    color: #fca5a5;
-  }
-
-  .sector-bar {
-    flex: 1;
-    height: 4px;
-    background: #475569;
-    border-radius: 2px;
-    overflow: hidden;
-  }
-
-  .bar-fill {
-    height: 100%;
-    border-radius: 2px;
-    transition: width 0.3s ease;
-  }
-
-  .bar-fill.positive {
-    background: #86efac;
-  }
-
-  .bar-fill.negative {
-    background: #fca5a5;
-  }
-
-  /* News */
-  .news-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .news-item {
-    display: flex;
-    gap: 12px;
-    padding: 12px;
-    background: #334155;
-    border-radius: 8px;
-    border-left: 3px solid #6366f1;
-  }
-
-  .news-symbol {
-    font-size: 11px;
-    font-weight: 700;
-    color: #818cf8;
-    min-width: 60px;
-  }
-
-  .news-content {
-    flex: 1;
-  }
-
-  .news-headline {
-    font-size: 12px;
-    font-weight: 600;
-    color: #f1f5f9;
-    margin: 0;
-    line-height: 1.4;
-  }
-
-  .news-time {
-    font-size: 10px;
-    color: #94a3b8;
-    margin: 4px 0 0;
-  }
-
-  /* Products & Tools */
-  .products-tools-section {
-    padding: 32px 0;
-    border-top: 1px solid #475569;
-  }
-
-  .products-title {
-    font-size: 20px;
-    font-weight: 700;
-    color: #f1f5f9;
-    margin: 0 0 24px;
-  }
-
-  .products-grid {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 16px;
-    margin-top: 20px;
-  }
-
-  .product-card {
-    background: #1e293b;
-    border: 1px solid #475569;
-    border-radius: 12px;
-    padding: 20px;
-    text-align: center;
-    transition: all 0.3s ease;
-  }
-
-  .product-card:hover {
-    border-color: #6366f1;
-    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.2);
-    transform: translateY(-4px);
-  }
-
-  /* Monthly P&L Trends */
-  .monthly-pnl {
-    padding-top: 32px;
-    border-top: 1px solid #475569;
-  }
-
-  .chart-container {
-    background: #0f172a;
-    border: 1px solid #334155;
-    border-radius: 12px;
-    padding: 20px;
-    margin-top: 16px;
-  }
-
-  .bar-chart {
-    width: 100%;
+  .table-container {
     overflow-x: auto;
   }
 
-  .chart-svg {
+  .data-table {
     width: 100%;
-    min-width: 600px;
+    border-collapse: collapse;
   }
 
-  .chart-legend {
-    display: flex;
-    gap: 24px;
-    margin-top: 16px;
-    justify-content: center;
+  .data-table th {
+    text-align: left;
+    padding: 16px 24px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    background: #0f172a;
+    border-bottom: 1px solid #334155;
   }
 
-  .legend-item {
+  .data-table td {
+    padding: 16px 24px;
+    font-size: 14px;
+    color: #f1f5f9;
+    border-bottom: 1px solid #334155;
+  }
+
+  .data-table tr:hover td {
+    background: #334155;
+  }
+
+  .stock-name {
+    font-weight: 600;
+  }
+
+  .stock-company {
+    font-size: 12px;
+    color: #94a3b8;
+  }
+
+  .percent {
+    font-size: 11px;
+    margin-left: 4px;
+  }
+
+  .movers-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  .mover-card {
+    background: #1e293b;
+    border: 1px solid #475569;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .mover-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #334155;
+  }
+
+  .mover-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .mover-list {
+    padding: 12px;
+  }
+
+  .mover-item {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 8px;
+    padding: 12px;
+    border-radius: 8px;
+    transition: background 0.3s;
   }
 
-  .legend-color {
-    width: 16px;
-    height: 16px;
-    border-radius: 3px;
+  .mover-item:hover {
+    background: #334155;
   }
 
-  .legend-item span {
-    font-size: 13px;
-    color: #cbd5e1;
-  }
-
-  .product-card:hover {
-    border-color: #6366f1;
-    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.2);
-    transform: translateY(-4px);
-  }
-
-  .product-icon {
-    width: 50px;
-    height: 50px;
-    margin: 0 auto 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #818cf8;
-  }
-
-  .product-icon svg {
-    stroke: #818cf8;
-  }
-
-  .product-card:hover .product-icon svg {
-    stroke: #6366f1;
-  }
-
-  .product-name {
-    font-size: 13px;
+  .mover-symbol {
     font-weight: 600;
     color: #f1f5f9;
-    margin: 0 0 8px;
   }
 
-  .product-desc {
-    font-size: 11px;
+  .mover-company {
+    font-size: 12px;
     color: #94a3b8;
-    margin: 0;
-    line-height: 1.4;
   }
 
-  /* Responsive */
+  .mover-price {
+    text-align: right;
+  }
+
+  .mover-price .price {
+    font-weight: 600;
+    color: #f1f5f9;
+  }
+
+  .mover-price .change {
+    font-size: 12px;
+  }
+
+  .no-data {
+    text-align: center;
+    padding: 24px;
+    color: #94a3b8;
+  }
+
   @media (max-width: 1200px) {
     .kpi-grid {
       grid-template-columns: repeat(2, 1fr);
-    }
-
-    .main-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .collections-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    .products-grid {
-      grid-template-columns: repeat(3, 1fr);
     }
   }
 
@@ -1223,20 +555,14 @@
       grid-template-columns: 1fr;
     }
 
-    .welcome-title {
-      font-size: 24px;
-    }
-
-    .funds-grid {
+    .movers-grid {
       grid-template-columns: 1fr;
     }
 
-    .trading-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .products-grid {
-      grid-template-columns: repeat(2, 1fr);
+    .header-section {
+      flex-direction: column;
+      gap: 16px;
+      align-items: flex-start;
     }
   }
 </style>

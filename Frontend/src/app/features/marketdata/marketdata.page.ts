@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MarketdataService } from '../../core/services/marketdata.service';
-import { MarketData } from '../../core/models/analytics.model';
+import { MarketDataService } from '../../core/services/marketdata.service';
+import { MarketStock } from '../../core/models/stock.model';
 
 @Component({
   selector: 'app-marketdata',
@@ -12,17 +12,17 @@ import { MarketData } from '../../core/models/analytics.model';
 export class MarketdataPage {
 
   symbol = '';
-  quote!: MarketData;
+  quote!: MarketStock;
   loading = false;
 
-  constructor(private service: MarketdataService) {}
+  constructor(private service: MarketDataService) {}
 
   fetchQuote(): void {
     if (!this.symbol) return;
 
     this.loading = true;
-    this.service.getQuote(this.symbol).subscribe({
-      next: (data: MarketData) => {
+    this.service.getStockPrice(this.symbol).subscribe({
+      next: (data: MarketStock) => {
         this.quote = data;
         this.loading = false;
       },

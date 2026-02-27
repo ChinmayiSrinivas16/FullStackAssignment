@@ -8,14 +8,9 @@ StockFolio is a modern web application for managing stock portfolios and analyzi
 - Tech Stack
 - Quick Start
 - Contributors
-- License & Contributing
 
 ## Overview
 
-StockFolio supports detailed transaction histories, and analytics including win rates, realized/unrealized gains, and asset distribution across stocks, bonds, and cash. The app is designed for both new and experienced investors who want clear insights and actionable views of their holdings.
-
-## Features
-- User management: sign-up, login, JWT-based authentication
 - Portfolio management: create and track multiple portfolios
 - Holdings: detailed view of current positions and cost basis
 - Transactions: buy/sell entry, history, and filtering by date/asset
@@ -76,10 +71,9 @@ For local server:
 Open the frontend in your browser (usually `http://localhost:4200`) and the backend API on its configured port (Spring Boot default `http://localhost:8080`).
 
 ## Contributors
-
-- Thriam — Thriam bakesvar B — @Thriam
-- Chinmayi — Chinmayi Srinivas — @ChinmayiSrinivas16
-- Navtika Lipi — Navtika Lipi — @navtikalipi
+- [@Thriam](https://github.com/Thriam)
+- [@Chinmayi](https://github.com/ChinmayiSrinivas16)
+- [@NavtikaLipi](https://github.com/navtikalipi)
 
 Thank you to all contributors who improve StockFolio — submissions are welcome via pull requests.
 

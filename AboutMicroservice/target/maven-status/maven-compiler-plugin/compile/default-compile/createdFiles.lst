@@ -1,0 +1,4 @@
+com\tnc\about\controller\AboutController.class
+com\tnc\about\model\AboutInfo.class
+com\tnc\about\AboutMicroserviceApplication.class
+com\tnc\about\service\AboutService.class

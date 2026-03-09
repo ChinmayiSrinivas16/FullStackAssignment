@@ -1,0 +1,6 @@
+com\tnc\wallet\model\WalletSummary.class
+com\tnc\wallet\service\WalletService$1.class
+com\tnc\wallet\controller\WalletController.class
+com\tnc\wallet\service\WalletService$WalletAccount.class
+com\tnc\wallet\service\WalletService.class
+com\tnc\wallet\WalletMicroserviceApplication.class

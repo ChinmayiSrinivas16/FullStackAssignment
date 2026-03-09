@@ -1,34 +1,81 @@
-version: '3.8'
 services:
-  backend:
-    build:
-      context: ./Backend
-      dockerfile: Dockerfile
+  db:
+    image: mysql:8.0
+    container_name: stockfolio-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: stockdb
     ports:
-      - "8080:8080"
-    depends_on:
-      - market_data
-  market_data:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  market-data:
+    image: ${DOCKERHUB_USERNAME:-stockfolio}/stockfolio-market-data:latest
     build:
       context: ./Backend
       dockerfile: Dockerfile.market_data
-    command: python market_data_server.py
+    container_name: stockfolio-market-data
     ports:
-      - "5000:5000"
+      - "7666:7666"
+
+  wallet:
+    image: ${DOCKERHUB_USERNAME:-stockfolio}/stockfolio-wallet:latest
+    build:
+      context: ./WalletMicroservice
+      dockerfile: Dockerfile
+    container_name: stockfolio-wallet
+    ports:
+      - "8091:8091"
+
+  about:
+    image: ${DOCKERHUB_USERNAME:-stockfolio}/stockfolio-about:latest
+    build:
+      context: ./AboutMicroservice
+      dockerfile: Dockerfile
+    container_name: stockfolio-about
+    ports:
+      - "8090:8090"
+
+  backend:
+    image: ${DOCKERHUB_USERNAME:-stockfolio}/stockfolio-backend:latest
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: stockfolio-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/stockdb?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      WALLET_SERVICE_URL: http://wallet:8091
+      MARKET_DATA_BASE_URL: http://market-data:7666
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+      wallet:
+        condition: service_started
+      market-data:
+        condition: service_started
+
   frontend:
+    image: ${DOCKERHUB_USERNAME:-stockfolio}/stockfolio-frontend:latest
     build:
       context: ./Frontend
       dockerfile: Dockerfile
+    container_name: stockfolio-frontend
     ports:
-      - "4200:4200"
+      - "4200:80"
     depends_on:
       - backend
-    environment:
-      - API_URL=http://backend:8080
-  db:
-    image: mysql:latest
-    environment:
-      MYSQL_ROOT_PASSWORD: example_password
-      MYSQL_DATABASE: mydb
-    ports:
-      - "3306:3306"
+      - about
+      - wallet
+
+volumes:
+  db_data:

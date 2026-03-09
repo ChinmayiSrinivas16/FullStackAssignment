@@ -1,5 +1,6 @@
 package com.tnc.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -13,7 +14,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class MarketDataService {
 
-    private static final String MARKET_DATA_BASE_URL = "http://localhost:7666";
+    @Value("${market.data.base.url:http://localhost:7666}")
+    private String marketDataBaseUrl;
+
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
     // Fallback local cache (used if mock server isn't reachable)
@@ -104,7 +107,7 @@ public class MarketDataService {
 
     public MockQuote fetchQuote(String symbol) throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create(MARKET_DATA_BASE_URL + "/market/" + symbol))
+            .uri(URI.create(marketDataBaseUrl + "/market/" + symbol))
             .GET()
             .build();
 

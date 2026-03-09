@@ -60,6 +60,32 @@ public class TransactionsController {
                 });
     }
 
+    @GetMapping("/wallet")
+    public ResponseEntity<?> getWalletSummary(Authentication authentication) {
+        String username = authentication.getName();
+        Map<String, Object> response = transactionsService.getWalletSummary(username);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/wallet/add-money")
+    public ResponseEntity<?> addMoneyToWallet(@RequestBody Map<String, Object> request, Authentication authentication) {
+        String username = authentication.getName();
+        try {
+            if (!request.containsKey("amount") || !(request.get("amount") instanceof Number)) {
+                throw new IllegalArgumentException("Amount is required");
+            }
+            double amount = ((Number) request.get("amount")).doubleValue();
+            Map<String, Object> response = transactionsService.addMoneyToWallet(username, amount);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException ex) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("message", ex.getMessage());
+            error.put("timestamp", System.currentTimeMillis());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
     @PostMapping
     public ResponseEntity<?> createTransaction(@RequestBody Map<String, Object> request, Authentication authentication) {
         String username = authentication.getName();
@@ -98,7 +124,27 @@ public class TransactionsController {
             transaction.setNotes((String) request.get("notes"));
         }
         
-        Transaction savedTransaction = transactionsService.createTransaction(transaction, username);
+        Transaction savedTransaction;
+        try {
+            savedTransaction = transactionsService.createTransaction(transaction, username);
+        } catch (IllegalArgumentException ex) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("message", ex.getMessage());
+            error.put("timestamp", System.currentTimeMillis());
+            return ResponseEntity.badRequest().body(error);
+        } catch (Exception ex) {
+            String message = extractRootMessage(ex);
+            if (message == null || message.trim().isEmpty()) {
+                message = "Unable to complete transaction";
+            }
+
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("message", message);
+            error.put("timestamp", System.currentTimeMillis());
+            return ResponseEntity.badRequest().body(error);
+        }
         
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
@@ -119,6 +165,29 @@ public class TransactionsController {
         response.put("timestamp", System.currentTimeMillis());
         
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    private String extractRootMessage(Throwable throwable) {
+        Throwable current = throwable;
+        while (current != null) {
+            if (current.getMessage() != null && !current.getMessage().trim().isEmpty()) {
+                String msg = current.getMessage();
+                if (msg.contains("Insufficient balance")) {
+                    return "Insufficient balance";
+                }
+                if (msg.contains("Cannot sell a stock you do not currently hold.")) {
+                    return "Cannot sell a stock you do not currently hold.";
+                }
+                if (msg.contains("Insufficient quantity in holdings for sell transaction.")) {
+                    return "Insufficient quantity in holdings for sell transaction.";
+                }
+                if (msg.contains("Wallet request failed")) {
+                    return "Insufficient balance";
+                }
+            }
+            current = current.getCause();
+        }
+        return null;
     }
 
     @PostMapping("/advanced")
@@ -154,7 +223,16 @@ public class TransactionsController {
             transaction.setNotes((String) request.get("notes"));
         }
         
-        Transaction savedTransaction = transactionsService.placeAdvancedOrder(transaction, username);
+        Transaction savedTransaction;
+        try {
+            savedTransaction = transactionsService.placeAdvancedOrder(transaction, username);
+        } catch (IllegalArgumentException ex) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("message", ex.getMessage());
+            error.put("timestamp", System.currentTimeMillis());
+            return ResponseEntity.badRequest().body(error);
+        }
         
         Map<String, Object> response = new HashMap<>();
         response.put("success", "EXECUTED".equals(savedTransaction.getStatus()));

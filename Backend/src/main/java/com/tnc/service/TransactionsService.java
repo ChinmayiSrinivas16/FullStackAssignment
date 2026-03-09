@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -33,6 +35,9 @@ public class TransactionsService {
 
     @Autowired
     private MarketDataService marketDataService;
+
+    @Autowired
+    private WalletClientService walletClientService;
 
     public List<Transaction> getAllTransactions(String username, String type, Integer limit, Integer offset) {
         User user = userRepository.findByUsername(username).orElse(null);
@@ -66,12 +71,55 @@ public class TransactionsService {
         return transactionRepository.findById(id);
     }
 
+    public Map<String, Object> getWalletSummary(String username) {
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        walletClientService.ensureWallet(user.getUsername());
+
+        Map<String, Object> wallet = walletClientService.getWalletSummary(user.getUsername());
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("balance", wallet.get("balance"));
+        data.put("minimumBalance", wallet.get("minimumBalance"));
+        data.put("availableToTrade", wallet.get("availableToTrade"));
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "Wallet summary retrieved");
+        response.put("data", data);
+        response.put("timestamp", System.currentTimeMillis());
+        return response;
+    }
+
+    public Map<String, Object> addMoneyToWallet(String username, double amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Amount must be greater than zero");
+        }
+
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        walletClientService.ensureWallet(user.getUsername());
+        walletClientService.credit(user.getUsername(), amount);
+        Map<String, Object> wallet = walletClientService.getWalletSummary(user.getUsername());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "Wallet funded successfully");
+        response.put("data", wallet);
+        response.put("timestamp", System.currentTimeMillis());
+        return response;
+    }
+
     @Transactional
     public Transaction createTransaction(Transaction transaction, String username) {
         User user = userRepository.findByUsername(username).orElse(null);
         if (user == null) {
             throw new RuntimeException("User not found");
         }
+
+        validateTradeRequest(transaction);
         
         transaction.setUser(user);
         
@@ -127,6 +175,10 @@ public class TransactionsService {
             transaction.setTransactionDate(new Date());
         }
         transaction.setTransactionTime(new Date());
+
+        if ("SELL".equalsIgnoreCase(transaction.getType())) {
+            validateSellInventory(user, transaction.getSymbol(), transaction.getQuantity());
+        }
         
         Transaction savedTransaction = transactionRepository.save(transaction);
         
@@ -144,6 +196,8 @@ public class TransactionsService {
         if (user == null) {
             throw new RuntimeException("User not found");
         }
+
+        validateTradeRequest(transaction);
         
         transaction.setUser(user);
         transaction.setStatus("PENDING");
@@ -208,6 +262,9 @@ public class TransactionsService {
         transaction.setPrice(executionPrice);
         
         if (shouldExecute) {
+            if ("SELL".equalsIgnoreCase(transaction.getType())) {
+                validateSellInventory(user, transaction.getSymbol(), transaction.getQuantity());
+            }
             transaction.setStatus("EXECUTED");
             Transaction saved = transactionRepository.save(transaction);
             updateHoldingsAfterTransaction(saved, user);
@@ -223,6 +280,7 @@ public class TransactionsService {
         String type = transaction.getType().toUpperCase();
         double quantity = transaction.getQuantity();
         double price = transaction.getPrice();
+        double transactionAmount = quantity * price;
         
         Portfolio portfolio = getOrCreateDefaultPortfolio(user);
         
@@ -232,6 +290,8 @@ public class TransactionsService {
                 .findFirst();
         
         if ("BUY".equals(type)) {
+            walletClientService.debit(user.getUsername(), transactionAmount);
+
             if (existingHolding.isPresent()) {
                 Holding holding = existingHolding.get();
                 double currentValue = holding.getQuantity() * holding.getAverageCost();
@@ -278,6 +338,11 @@ public class TransactionsService {
         } else if ("SELL".equals(type)) {
             if (existingHolding.isPresent()) {
                 Holding holding = existingHolding.get();
+
+                if (quantity > holding.getQuantity()) {
+                    throw new IllegalArgumentException("Insufficient quantity in holdings for sell transaction.");
+                }
+
                 double newQuantity = holding.getQuantity() - quantity;
                 
                 if (newQuantity <= 0) {
@@ -298,7 +363,42 @@ public class TransactionsService {
                     
                     holdingRepository.save(holding);
                 }
+                walletClientService.credit(user.getUsername(), transactionAmount);
+            } else {
+                throw new IllegalArgumentException("Cannot sell a stock you do not currently hold.");
             }
+        }
+    }
+
+    private void validateTradeRequest(Transaction transaction) {
+        if (transaction.getSymbol() == null || transaction.getSymbol().trim().isEmpty()) {
+            throw new IllegalArgumentException("Symbol is required");
+        }
+        if (transaction.getType() == null || transaction.getType().trim().isEmpty()) {
+            throw new IllegalArgumentException("Transaction type is required");
+        }
+        if (transaction.getQuantity() <= 0) {
+            throw new IllegalArgumentException("Quantity must be greater than zero");
+        }
+
+        String normalizedType = transaction.getType().toUpperCase();
+        if (!"BUY".equals(normalizedType) && !"SELL".equals(normalizedType)) {
+            throw new IllegalArgumentException("Transaction type must be BUY or SELL");
+        }
+    }
+
+    private void validateSellInventory(User user, String symbol, double quantityToSell) {
+        List<Holding> userHoldings = holdingRepository.findByUserId(user.getId());
+        Optional<Holding> existingHolding = userHoldings.stream()
+            .filter(h -> h.getSymbol().equalsIgnoreCase(symbol))
+            .findFirst();
+
+        if (existingHolding.isEmpty()) {
+            throw new IllegalArgumentException("Cannot sell a stock you do not currently hold.");
+        }
+
+        if (quantityToSell > existingHolding.get().getQuantity()) {
+            throw new IllegalArgumentException("Insufficient quantity in holdings for sell transaction.");
         }
     }
 

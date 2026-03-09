@@ -37,7 +37,7 @@ public class MarketDataHistory extends BaseEntity {
     @Column(name = "previous_close")
     private Double previousClose;
 
-    @Column
+    @Column(name = "price_change")
     private Double change;
 
     @Column(name = "change_percent")

@@ -1,0 +1,40 @@
+<div class="portfolio-container">
+  <h1 class="portfolio-title">My Portfolio</h1>
+  
+  <div class="portfolio-stats">
+    <app-stat-card 
+      title="Total Value" 
+      [value]="totalValue" 
+      [change]="totalChange">
+    </app-stat-card>
+    
+    <app-stat-card 
+      title="Invested Amount" 
+      [value]="investedAmount" 
+      [change]="investedChange">
+    </app-stat-card>
+    
+    <app-stat-card 
+      title="Profit/Loss" 
+      [value]="profitLoss" 
+      [change]="profitLossChange">
+    </app-stat-card>
+  </div>
+
+  <div class="portfolio-charts">
+    <app-chart-card 
+      title="Portfolio Performance" 
+      [data]="performanceData">
+    </app-chart-card>
+    
+    <app-chart-card 
+      title="Asset Allocation" 
+      [data]="allocationData">
+    </app-chart-card>
+  </div>
+
+  <app-empty-state *ngIf="isEmptyPortfolio">
+    <h2>No Investments Found</h2>
+    <p>Your portfolio is currently empty. Start adding investments to see your performance.</p>
+  </app-empty-state>
+</div>

@@ -1,0 +1,39 @@
+@import '~src/app/core/design-tokens/_colors.scss';
+@import '~src/app/core/design-tokens/_spacing.scss';
+@import '~src/app/core/design-tokens/_typography.scss';
+@import '~src/app/core/design-tokens/_radius.scss';
+@import '~src/app/core/design-tokens/_shadows.scss';
+
+.sidebar {
+    width: 250px;
+    background-color: $sidebar-background;
+    box-shadow: $shadow-elevation;
+    padding: $spacing-medium;
+    border-radius: $radius-small;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.sidebar-item {
+    padding: $spacing-small;
+    margin: $spacing-small 0;
+    border-radius: $radius-small;
+    transition: background-color 0.3s;
+
+    &:hover {
+        background-color: $sidebar-item-hover;
+    }
+}
+
+.sidebar-title {
+    font-size: $font-size-large;
+    font-weight: $font-weight-bold;
+    color: $text-color;
+    margin-bottom: $spacing-medium;
+}
+
+.sidebar-icon {
+    margin-right: $spacing-small;
+    fill: $icon-color;
+}

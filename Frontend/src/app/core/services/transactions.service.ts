@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { ApiResponse, Transaction, CreateTransactionRequest } from '../models';
+import { ApiResponse, Transaction, CreateTransactionRequest, WalletSummary } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class TransactionsService {
@@ -26,5 +26,9 @@ export class TransactionsService {
 
   createTransaction(transaction: CreateTransactionRequest): Observable<ApiResponse<Transaction>> {
     return this.http.post<ApiResponse<Transaction>>(this.apiUrl, transaction);
+  }
+
+  getWalletSummary(): Observable<ApiResponse<WalletSummary>> {
+    return this.http.get<ApiResponse<WalletSummary>>(`${this.apiUrl}/wallet`);
   }
 }

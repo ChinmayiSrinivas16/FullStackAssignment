@@ -3,20 +3,25 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { IconComponent } from '../../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, IconComponent],
   template: `
     <div class="auth-container">
       <div class="auth-card">
         <div class="auth-header">
           <div class="logo">
-            <span class="logo-icon">📈</span>
+            <span class="logo-icon"><app-icon name="activity" [size]="28"></app-icon></span>
             <h1>StockFolio</h1>
           </div>
           <p class="subtitle">Create your investor account</p>
+          <div class="market-badges">
+            <span class="badge">NSE</span>
+            <span class="badge">BSE</span>
+          </div>
         </div>
 
         <form (ngSubmit)="onRegister()" class="auth-form">
@@ -73,44 +78,66 @@ import { AuthService } from '../../../core/services/auth.service';
     .auth-container {
       display: flex;
       min-height: 100vh;
-      background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+      background:
+        radial-gradient(circle at 15% 10%, rgba(37, 99, 235, 0.22), transparent 35%),
+        linear-gradient(160deg, var(--color-bg) 0%, var(--color-bg) 100%);
       align-items: center;
       justify-content: center;
     }
     .auth-card {
-      width: 520px;
-      padding: 48px;
-      background: #fff;
-      border-radius: 20px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      width: min(560px, 92vw);
+      padding: var(--space-10);
+      background: var(--surface-strong);
+      border: 1px solid var(--color-border-soft);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
     }
     .auth-header {
       text-align: center;
-      margin-bottom: 32px;
+      margin-bottom: var(--space-8);
     }
     .logo {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 12px;
+      gap: var(--space-3);
     }
-    .logo-icon { font-size: 36px; }
+    .logo-icon {
+      color: var(--color-primary);
+      display: inline-flex;
+    }
     .logo h1 {
-      font-size: 28px;
       margin: 0;
-      background: linear-gradient(135deg, #1a1a2e, #3a7bd5);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: var(--color-text-primary);
     }
-    .subtitle { color: #666; margin-top: 8px; font-size: 14px; }
+    .subtitle {
+      color: var(--color-text-secondary);
+      margin-top: var(--space-2);
+      font-size: 14px;
+    }
+    .market-badges {
+      display: flex;
+      gap: var(--space-2);
+      justify-content: center;
+      margin-top: var(--space-3);
+    }
+    .badge {
+      background: var(--overlay-primary-20);
+      color: var(--color-text-primary);
+      padding: 4px 14px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.7px;
+    }
     .auth-form {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: var(--space-4);
     }
     .form-row {
       display: flex;
-      gap: 16px;
+      gap: var(--space-4);
     }
     .form-row .form-group { flex: 1; }
     .form-group label {
@@ -118,46 +145,58 @@ import { AuthService } from '../../../core/services/auth.service';
       margin-bottom: 6px;
       font-size: 13px;
       font-weight: 600;
-      color: #333;
+      color: var(--color-text-primary);
     }
     .form-group input {
       width: 100%;
       padding: 12px 14px;
-      background: #f7f8fa;
-      border: 2px solid #e8ecf0;
-      border-radius: 10px;
+      background: var(--color-sidebar);
+      border: 1px solid var(--color-border-soft);
+      border-radius: var(--radius-sm);
       font-size: 14px;
       outline: none;
-      transition: border-color 0.2s;
+      transition: border-color 0.2s, box-shadow 0.2s;
       box-sizing: border-box;
+      color: var(--color-text-primary);
+      caret-color: var(--color-text-primary);
+    }
+    .form-group input:-webkit-autofill,
+    .form-group input:-webkit-autofill:hover,
+    .form-group input:-webkit-autofill:focus,
+    .form-group input:-webkit-autofill:active {
+      -webkit-text-fill-color: var(--color-text-primary);
+      box-shadow: 0 0 0 1000px var(--color-sidebar) inset;
+      -webkit-box-shadow: 0 0 0 1000px var(--color-sidebar) inset;
+      caret-color: var(--color-text-primary);
+      transition: background-color 9999s ease-out 0s;
     }
     .form-group input:focus {
-      border-color: #3a7bd5;
-      background: #fff;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
     }
     .error-msg {
-      background: #fff5f5;
-      color: #e53e3e;
+      background: var(--overlay-loss-14);
+      color: var(--color-loss);
       padding: 10px 14px;
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       font-size: 13px;
-      border: 1px solid #fed7d7;
+      border: 1px solid var(--border-loss-soft);
     }
     .success-msg {
-      background: #f0fff4;
-      color: #38a169;
+      background: var(--overlay-profit-14);
+      color: var(--color-profit);
       padding: 10px 14px;
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       font-size: 13px;
-      border: 1px solid #c6f6d5;
+      border: 1px solid var(--border-profit-soft);
     }
     .btn-primary {
       width: 100%;
       padding: 14px;
-      background: linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%);
-      color: #fff;
+      background: var(--color-primary);
+      color: var(--color-text-primary);
       border: none;
-      border-radius: 12px;
+      border-radius: var(--radius-sm);
       font-size: 15px;
       font-weight: 600;
       cursor: pointer;
@@ -169,27 +208,37 @@ import { AuthService } from '../../../core/services/auth.service';
     }
     .btn-primary:hover:not(:disabled) {
       transform: translateY(-1px);
-      box-shadow: 0 8px 25px rgba(58,123,213,0.4);
+      background: var(--color-primary-hover);
+      box-shadow: 0 10px 22px var(--overlay-primary-36);
     }
     .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
     .spinner {
       width: 16px; height: 16px;
-      border: 2px solid rgba(255,255,255,0.3);
-      border-top-color: #fff;
+      border: 2px solid var(--text-on-dark-soft);
+      border-top-color: var(--color-text-primary);
       border-radius: 50%;
       animation: spin 0.6s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
     .auth-footer {
       text-align: center;
-      margin-top: 24px;
+      margin-top: var(--space-6);
       font-size: 14px;
-      color: #666;
+      color: var(--color-text-secondary);
     }
     .auth-footer a {
-      color: #3a7bd5;
+      color: var(--color-primary);
       text-decoration: none;
       font-weight: 600;
+    }
+    @media (max-width: 700px) {
+      .auth-card {
+        padding: var(--space-6);
+      }
+      .form-row {
+        flex-direction: column;
+        gap: var(--space-3);
+      }
     }
   `]
 })

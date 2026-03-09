@@ -1,141 +1,263 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { InrPipe } from '../../shared/pipes/inr.pipe';
-import { HoldingsService } from '../../core/services/holdings.service';
-import { Holding } from '../../core/models';
 import { interval, Subscription } from 'rxjs';
+import { Holding } from '../../core/models';
+import { HoldingsService } from '../../core/services/holdings.service';
+import { IconComponent } from '../../shared/components/icon/icon.component';
+import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
+import { ChartCardComponent } from '../../shared/components/chart-card/chart-card.component';
+import { InrPipe } from '../../shared/pipes/inr.pipe';
 
 @Component({
   selector: 'app-holdings',
   standalone: true,
-  imports: [CommonModule, InrPipe],
+  imports: [CommonModule, InrPipe, IconComponent, EmptyStateComponent, ChartCardComponent],
   template: `
     <div class="holdings-page">
-      <div class="page-header">
+      <header class="page-header">
         <div>
           <h2>Portfolio Holdings</h2>
-          <p class="subtitle">Your current stock positions (auto-updated from transactions)</p>
+          <p class="subtitle">Current stock positions synced from your transactions</p>
         </div>
-        <div class="live-indicator">
-          <span class="live-dot"></span> Live
-        </div>
-      </div>
+        <span class="live-indicator"><span class="live-dot"></span> Live</span>
+      </header>
 
-      <!-- Auto-refresh notice -->
       <div class="auto-notice">
-        <span class="info-icon">ℹ️</span>
-        Holdings are automatically updated from your buy/sell transactions. Market prices refresh every second.
+        <app-icon name="activity" [size]="15"></app-icon>
+        Holdings and market prices refresh automatically every 10 seconds.
       </div>
 
-      <!-- Holdings Table -->
-      <div class="table-card">
+      <app-chart-card title="Holdings Table" meta="Live quantities, valuations and P&L">
         @if (loading) {
-          <div class="loading">Loading holdings...</div>
+          <div class="loading-state">
+            <div class="loader"></div>
+            <p>Loading holdings...</p>
+          </div>
         } @else if (holdings.length === 0) {
-          <div class="empty-state">
-            <div class="empty-icon">📊</div>
-            <h3>No Holdings Yet</h3>
-            <p>Start by buying stocks from the Transactions page. Your holdings will appear here automatically.</p>
-          </div>
+          <app-empty-state
+            title="No holdings yet"
+            message="Start by creating buy transactions. Your positions will appear here automatically."
+            icon="briefcase"></app-empty-state>
         } @else {
-          <!-- Summary Strip -->
-          <div class="summary-strip">
-            <div class="summary-item">
-              <span class="label">Total Invested</span>
-              <span class="value">{{ totalInvested | inr }}</span>
-            </div>
-            <div class="summary-item">
-              <span class="label">Current Value</span>
-              <span class="value">{{ totalCurrentValue | inr }}</span>
-            </div>
-            <div class="summary-item">
-              <span class="label">Total P&L</span>
-              <span class="value" [class.positive]="totalPnL >= 0" [class.negative]="totalPnL < 0">
-                {{ totalPnL >= 0 ? '+' : '' }}{{ totalPnL | inr }}
-              </span>
-            </div>
-          </div>
+          <section class="summary-strip">
+            <article>
+              <span>Total Invested</span>
+              <strong>{{ totalInvested | inr }}</strong>
+            </article>
+            <article>
+              <span>Current Value</span>
+              <strong>{{ totalCurrentValue | inr }}</strong>
+            </article>
+            <article>
+              <span>Total P&L</span>
+              <strong [class.profit]="totalPnL >= 0" [class.loss]="totalPnL < 0">{{ totalPnL >= 0 ? '+' : '' }}{{ totalPnL | inr }}</strong>
+            </article>
+          </section>
 
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Symbol</th>
-                <th>Qty</th>
-                <th>Avg Cost</th>
-                <th>Current Price</th>
-                <th>Total Cost</th>
-                <th>Current Value</th>
-                <th>P&L</th>
-                <th>P&L %</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (holding of holdings; track holding.id) {
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
                 <tr>
-                  <td><span class="symbol-tag">{{ holding.symbol }}</span></td>
-                  <td>{{ holding.quantity }}</td>
-                  <td>{{ holding.purchasePrice | inr }}</td>
-                  <td class="live-price">{{ holding.currentPrice | inr }}</td>
-                  <td>{{ holding.totalCost | inr }}</td>
-                  <td>{{ holding.currentValue | inr }}</td>
-                  <td [class.positive]="holding.pnL >= 0" [class.negative]="holding.pnL < 0">
-                    {{ holding.pnL >= 0 ? '+' : '' }}{{ holding.pnL | inr }}
-                  </td>
-                  <td>
-                    <span class="pnl-badge" 
-                          [class.positive-bg]="holding.pnLPercentage >= 0" 
-                          [class.negative-bg]="holding.pnLPercentage < 0">
-                      {{ holding.pnLPercentage >= 0 ? '+' : '' }}{{ holding.pnLPercentage | number:'1.2-2' }}%
-                    </span>
-                  </td>
+                  <th>Symbol</th>
+                  <th>Qty</th>
+                  <th>Avg Cost</th>
+                  <th>Current Price</th>
+                  <th>Total Cost</th>
+                  <th>Current Value</th>
+                  <th>P&L</th>
+                  <th>P&L %</th>
                 </tr>
-              }
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                @for (holding of holdings; track holding.id) {
+                  <tr>
+                    <td><span class="symbol-pill">{{ holding.symbol }}</span></td>
+                    <td>{{ holding.quantity }}</td>
+                    <td>{{ holding.purchasePrice | inr }}</td>
+                    <td class="live-price">{{ holding.currentPrice | inr }}</td>
+                    <td>{{ holding.totalCost | inr }}</td>
+                    <td>{{ holding.currentValue | inr }}</td>
+                    <td [class.profit]="holding.pnL >= 0" [class.loss]="holding.pnL < 0">
+                      {{ holding.pnL >= 0 ? '+' : '' }}{{ holding.pnL | inr }}
+                    </td>
+                    <td>
+                      <span class="pnl-badge" [class.positive-bg]="holding.pnLPercentage >= 0" [class.negative-bg]="holding.pnLPercentage < 0">
+                        {{ holding.pnLPercentage >= 0 ? '+' : '' }}{{ holding.pnLPercentage | number:'1.2-2' }}%
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
         }
-      </div>
+      </app-chart-card>
     </div>
   `,
-  styles: [`
-    .holdings-page { padding: 24px; }
-    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .page-header h2 { margin: 0; font-size: 24px; color: #1a1a2e; }
-    .subtitle { margin: 4px 0 0; color: #666; font-size: 14px; }
-    .live-indicator { display: flex; align-items: center; gap: 6px; color: #00c853; font-weight: 600; font-size: 12px; }
-    .live-dot { width: 8px; height: 8px; background: #00c853; border-radius: 50%; animation: pulse 1.5s infinite; }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-    
-    .auto-notice { display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: #e8f4fd; border-radius: 8px; margin-bottom: 16px; color: #3a7bd5; font-size: 13px; }
-    .info-icon { font-size: 16px; }
-    
-    .table-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-    .loading, .empty-state { padding: 60px 40px; text-align: center; color: #666; }
-    .empty-icon { font-size: 48px; margin-bottom: 16px; }
-    .empty-state h3 { margin: 0 0 8px; color: #1a1a2e; }
-    .empty-state p { margin: 0; color: #666; font-size: 14px; }
-    
-    .summary-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding: 20px 24px; background: #f8f9fa; border-bottom: 1px solid #eee; }
-    .summary-item { display: flex; flex-direction: column; gap: 4px; }
-    .summary-item .label { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
-    .summary-item .value { font-size: 20px; font-weight: 700; color: #1a1a2e; }
-    
-    .data-table { width: 100%; border-collapse: collapse; }
-    .data-table th { text-align: left; padding: 14px 16px; background: #f8f9fa; font-weight: 600; color: #444; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .data-table td { padding: 14px 16px; border-bottom: 1px solid #f5f5f5; }
-    .data-table tbody tr:hover td { background: #f7f8fa; }
-    
-    .symbol-tag { background: #e8f4fd; color: #3a7bd5; padding: 4px 12px; border-radius: 6px; font-weight: 600; font-size: 12px; }
-    .live-price { font-weight: 600; color: #00c853; }
-    .positive { color: #00c853; }
-    .negative { color: #ff5252; }
-    .pnl-badge { padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
-    .positive-bg { background: rgba(0,200,83,0.1); color: #00c853; }
-    .negative-bg { background: rgba(255,82,82,0.1); color: #ff5252; }
-
-    @media (max-width: 900px) {
-      .summary-strip { grid-template-columns: 1fr 1fr; }
-    }
-  `]
+  styles: [
+    `
+      .holdings-page {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: grid;
+        gap: var(--space-5);
+      }
+      .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        gap: var(--space-4);
+      }
+      h2 {
+        margin: 0;
+        font-size: 22px;
+      }
+      .subtitle {
+        margin: var(--space-1) 0 0;
+        color: var(--color-text-secondary);
+      }
+      .live-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+        color: var(--color-profit);
+        font-weight: 600;
+      }
+      .live-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--color-profit);
+        animation: pulse 1.8s infinite ease;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.45;
+        }
+      }
+      .auto-notice {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+        width: fit-content;
+        border: 1px solid var(--color-border-soft);
+        border-radius: var(--radius-sm);
+        background: var(--surface-muted-2);
+        color: var(--color-text-secondary);
+        padding: 10px 12px;
+      }
+      .summary-strip {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: var(--space-3);
+        align-items: stretch;
+        margin-bottom: var(--space-4);
+      }
+      .summary-strip article {
+        padding: var(--space-4);
+        border: 1px solid var(--color-border-soft);
+        border-radius: var(--radius-md);
+        background: var(--surface-muted-3);
+        height: 100%;
+      }
+      .summary-strip span {
+        display: block;
+        color: var(--color-text-secondary);
+        margin-bottom: var(--space-1);
+      }
+      .summary-strip strong {
+        font-size: 1.2rem;
+      }
+      .table-wrap {
+        overflow: auto;
+      }
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .data-table th,
+      .data-table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid var(--color-border);
+      }
+      .data-table th {
+        color: var(--color-text-secondary);
+        font-size: 0.75rem;
+        letter-spacing: 0.04em;
+      }
+      .data-table td {
+        color: var(--color-text-primary);
+      }
+      .symbol-pill {
+        display: inline-flex;
+        padding: 2px 8px;
+        border-radius: 999px;
+        background: var(--overlay-primary-18);
+        color: var(--color-text-primary);
+        font-weight: 600;
+      }
+      .live-price {
+        color: var(--color-primary);
+        font-weight: 600;
+      }
+      .profit {
+        color: var(--color-profit);
+      }
+      .loss {
+        color: var(--color-loss);
+      }
+      .pnl-badge {
+        display: inline-flex;
+        padding: 3px 8px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 600;
+      }
+      .positive-bg {
+        background: var(--overlay-profit-16);
+        color: var(--color-profit);
+      }
+      .negative-bg {
+        background: var(--overlay-loss-14);
+        color: var(--color-loss);
+      }
+      .loading-state {
+        display: grid;
+        justify-items: center;
+        gap: var(--space-3);
+        padding: var(--space-10) 0;
+        color: var(--color-text-secondary);
+      }
+      .loader {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 3px solid var(--border-text-soft);
+        border-top-color: var(--color-primary);
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @media (max-width: 900px) {
+        .summary-strip {
+          grid-template-columns: 1fr;
+        }
+      }
+      @media (max-width: 700px) {
+        .page-header {
+          flex-direction: column;
+        }
+      }
+    `
+  ]
 })
 export class HoldingsComponent implements OnInit, OnDestroy {
   holdings: Holding[] = [];
@@ -146,14 +268,14 @@ export class HoldingsComponent implements OnInit, OnDestroy {
   totalPnL = 0;
 
   private refreshSubscription?: Subscription;
+  private readonly REFRESH_INTERVAL = 10000;
 
   constructor(private holdingsService: HoldingsService) {}
 
   ngOnInit(): void {
     this.loadHoldings();
-    
-    // Auto-refresh every second for live prices
-    this.refreshSubscription = interval(1000).subscribe(() => {
+
+    this.refreshSubscription = interval(this.REFRESH_INTERVAL).subscribe(() => {
       this.loadHoldings();
     });
   }
@@ -169,7 +291,9 @@ export class HoldingsComponent implements OnInit, OnDestroy {
         this.calculateTotals();
         this.loading = false;
       },
-      error: () => { this.loading = false; }
+      error: () => {
+        this.loading = false;
+      }
     });
   }
 

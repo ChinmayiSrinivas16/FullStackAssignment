@@ -1,0 +1,39 @@
+$shadow-color: rgba(0, 0, 0, 0.1);
+$shadow-color-dark: rgba(0, 0, 0, 0.2);
+
+$shadow-small: 0 1px 2px $shadow-color;
+$shadow-medium: 0 2px 4px $shadow-color;
+$shadow-large: 0 4px 8px $shadow-color;
+$shadow-xlarge: 0 8px 16px $shadow-color;
+
+$shadow-elevation-1: 0 1px 3px $shadow-color;
+$shadow-elevation-2: 0 3px 6px $shadow-color-dark;
+$shadow-elevation-3: 0 6px 12px $shadow-color-dark;
+
+.shadow-small {
+  box-shadow: $shadow-small;
+}
+
+.shadow-medium {
+  box-shadow: $shadow-medium;
+}
+
+.shadow-large {
+  box-shadow: $shadow-large;
+}
+
+.shadow-xlarge {
+  box-shadow: $shadow-xlarge;
+}
+
+.shadow-elevation-1 {
+  box-shadow: $shadow-elevation-1;
+}
+
+.shadow-elevation-2 {
+  box-shadow: $shadow-elevation-2;
+}
+
+.shadow-elevation-3 {
+  box-shadow: $shadow-elevation-3;
+}

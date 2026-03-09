@@ -213,3 +213,22 @@ export interface ReportResponse {
   status: string;
   createdAt: string;
 }
+
+// ── About ──
+export interface AboutInfo {
+  companyName: string;
+  companyId: string;
+  gstNumber: string;
+  panNumber: string;
+  cinNumber: string;
+  supportEmail: string;
+  supportPhone: string;
+  website: string;
+  registeredOffice: string;
+}
+
+export interface WalletSummary {
+  balance: number;
+  minimumBalance: number;
+  availableToTrade: number;
+}

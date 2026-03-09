@@ -1,0 +1,50 @@
+@import '~@/core/design-tokens/colors';
+@import '~@/core/design-tokens/spacing';
+@import '~@/core/design-tokens/typography';
+@import '~@/core/design-tokens/radius';
+@import '~@/core/design-tokens/shadows';
+
+.dashboard-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background-color: $background-color;
+
+    .header {
+        padding: $spacing-md;
+        background-color: $primary-color;
+        box-shadow: $shadow-md;
+        color: $text-color;
+        font-size: $font-size-lg;
+        font-weight: $font-weight-bold;
+    }
+
+    .content {
+        flex: 1;
+        display: flex;
+        padding: $spacing-lg;
+        overflow: auto;
+
+        .sidebar {
+            width: 250px;
+            background-color: $sidebar-color;
+            box-shadow: $shadow-md;
+            border-radius: $radius-md;
+        }
+
+        .main {
+            flex: 1;
+            padding: $spacing-lg;
+            background-color: $card-color;
+            border-radius: $radius-md;
+            box-shadow: $shadow-md;
+        }
+    }
+
+    .footer {
+        padding: $spacing-md;
+        background-color: $primary-color;
+        color: $text-color;
+        text-align: center;
+    }
+}

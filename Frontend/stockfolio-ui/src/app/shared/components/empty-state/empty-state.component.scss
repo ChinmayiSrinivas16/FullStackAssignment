@@ -1,0 +1,37 @@
+@import '~@/core/design-tokens/colors';
+@import '~@/core/design-tokens/spacing';
+@import '~@/core/design-tokens/typography';
+@import '~@/core/design-tokens/radius';
+@import '~@/core/design-tokens/shadows';
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: spacing(4);
+    text-align: center;
+    background-color: colors.background;
+    border-radius: radius(8);
+    box-shadow: shadows.elevation;
+
+    &__icon {
+        width: 64px;
+        height: 64px;
+        margin-bottom: spacing(2);
+        color: colors.text.secondary;
+    }
+
+    &__message {
+        font-size: typography.size.large;
+        font-weight: typography.weight.medium;
+        color: colors.text.primary;
+        margin-bottom: spacing(1);
+    }
+
+    &__description {
+        font-size: typography.size.medium;
+        color: colors.text.secondary;
+    }
+}

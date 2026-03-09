@@ -1,0 +1,45 @@
+@import '~src/app/core/design-tokens/_colors.scss';
+@import '~src/app/core/design-tokens/_spacing.scss';
+@import '~src/app/core/design-tokens/_typography.scss';
+@import '~src/app/core/design-tokens/_radius.scss';
+@import '~src/app/core/design-tokens/_shadows.scss';
+
+.dashboard {
+    display: flex;
+    flex-direction: column;
+    padding: $spacing-large;
+    background-color: $color-background;
+    border-radius: $radius-medium;
+    box-shadow: $shadow-elevation;
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: $spacing-medium;
+
+        h1 {
+            font-size: $font-size-large;
+            color: $color-text;
+        }
+    }
+
+    .content {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: $spacing-medium;
+
+        .stat-card {
+            @extend .stat-card;
+        }
+
+        .chart-card {
+            @extend .chart-card;
+        }
+    }
+
+    .empty-state {
+        @extend .empty-state;
+        margin-top: $spacing-large;
+    }
+}

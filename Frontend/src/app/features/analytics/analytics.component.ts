@@ -1,36 +1,46 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { NgChartsModule } from 'ng2-charts';
 import { ChartConfiguration, ChartData } from 'chart.js';
+import { NgChartsModule } from 'ng2-charts';
 import { forkJoin, interval, Subscription } from 'rxjs';
-import { InrPipe } from '../../shared/pipes/inr.pipe';
-import { PortfolioService } from '../../core/services/portfolio.service';
+import { AllocationItem, Holding, PnLData, WinRateData } from '../../core/models';
 import { AnalyticsService } from '../../core/services/analytics.service';
 import { HoldingsService } from '../../core/services/holdings.service';
-import { PnLData, WinRateData, Holding, AllocationItem } from '../../core/models';
+import { PortfolioService } from '../../core/services/portfolio.service';
+import { IconComponent } from '../../shared/components/icon/icon.component';
+import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
+import { ChartCardComponent } from '../../shared/components/chart-card/chart-card.component';
+import { InrPipe } from '../../shared/pipes/inr.pipe';
+import { FINTECH_CHART_LABEL_COLOR, FINTECH_CHART_PALETTE } from '../../shared/theme/chart-palette';
 
 @Component({
   selector: 'app-analytics',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgChartsModule, InrPipe],
+  imports: [
+    CommonModule,
+    FormsModule,
+    NgChartsModule,
+    InrPipe,
+    IconComponent,
+    EmptyStateComponent,
+    ChartCardComponent
+  ],
   template: `
     <div class="analytics-page">
-      <div class="page-header">
-        <div class="header-left">
-          <h2>Profit & Loss Analytics</h2>
+      <header class="page-header">
+        <div>
+          <h2>Profit and Loss Analytics</h2>
           <p class="subtitle">Deep insights into your portfolio performance</p>
         </div>
-        <div class="header-right">
-          <div class="live-indicator">
-            <span class="live-dot"></span> Live
-          </div>
+        <div class="header-actions">
+          <span class="live-indicator"><span class="live-dot"></span> Live</span>
           <button class="refresh-btn" (click)="refreshData()" [disabled]="loading">
-            <span class="refresh-icon" [class.spinning]="loading">🔄</span>
+            <app-icon name="refresh" [size]="14"></app-icon>
             Refresh
           </button>
         </div>
-      </div>
+      </header>
 
       @if (loading) {
         <div class="loading-state">
@@ -38,304 +48,398 @@ import { PnLData, WinRateData, Holding, AllocationItem } from '../../core/models
           <p>Analyzing your portfolio...</p>
         </div>
       } @else {
-        <!-- P&L Period Selector -->
-        <div class="section-card">
-          <div class="section-header">
-            <h3>Profit & Loss Analysis</h3>
-            <div class="period-selector">
-              @for (p of periods; track p) {
-                <button class="period-btn" [class.active]="selectedPeriod === p" (click)="changePeriod(p)">
-                  {{ p | titlecase }}
-                </button>
-              }
-            </div>
+        <app-chart-card title="Profit and Loss Analysis" meta="Choose a time period for P&L trends">
+          <div class="period-selector">
+            @for (p of periods; track p) {
+              <button class="period-btn" [class.active]="selectedPeriod === p" (click)="changePeriod(p)">
+                {{ p | titlecase }}
+              </button>
+            }
           </div>
 
           @if (pnlData) {
             <div class="pnl-cards">
-              <div class="pnl-card">
-                <span class="pnl-card-label">Total P&L</span>
-                <span class="pnl-card-value" [class.positive]="pnlData.totalPnL >= 0" [class.negative]="pnlData.totalPnL < 0">
-                  {{ pnlData.totalPnL | inr }}
-                </span>
-                <span class="pnl-card-pct" [class.positive]="pnlData.pnlPercentage >= 0" [class.negative]="pnlData.pnlPercentage < 0">
+              <article class="pnl-card">
+                <span>Total P&L</span>
+                <strong [class.profit]="pnlData.totalPnL >= 0" [class.loss]="pnlData.totalPnL < 0">{{ pnlData.totalPnL | inr }}</strong>
+                <small [class.profit]="pnlData.pnlPercentage >= 0" [class.loss]="pnlData.pnlPercentage < 0">
                   {{ pnlData.pnlPercentage >= 0 ? '+' : '' }}{{ pnlData.pnlPercentage | number:'1.2-2' }}%
-                </span>
-              </div>
-              <div class="pnl-card">
-                <span class="pnl-card-label">Realized Gains</span>
-                <span class="pnl-card-value" [class.positive]="pnlData.realizedPnL >= 0" [class.negative]="pnlData.realizedPnL < 0">
-                  {{ pnlData.realizedPnL | inr }}
-                </span>
-                <span class="pnl-card-sub">From closed positions</span>
-              </div>
-              <div class="pnl-card">
-                <span class="pnl-card-label">Unrealized Gains</span>
-                <span class="pnl-card-value" [class.positive]="pnlData.unrealizedPnL >= 0" [class.negative]="pnlData.unrealizedPnL < 0">
-                  {{ pnlData.unrealizedPnL | inr }}
-                </span>
-                <span class="pnl-card-sub">From open positions</span>
-              </div>
+                </small>
+              </article>
+              <article class="pnl-card">
+                <span>Realized Gains</span>
+                <strong [class.profit]="pnlData.realizedPnL >= 0" [class.loss]="pnlData.realizedPnL < 0">{{ pnlData.realizedPnL | inr }}</strong>
+                <small>From closed positions</small>
+              </article>
+              <article class="pnl-card">
+                <span>Unrealized Gains</span>
+                <strong [class.profit]="pnlData.unrealizedPnL >= 0" [class.loss]="pnlData.unrealizedPnL < 0">{{ pnlData.unrealizedPnL | inr }}</strong>
+                <small>From open positions</small>
+              </article>
             </div>
           }
-        </div>
+        </app-chart-card>
 
-        <!-- Win Rate & Top/Bottom Stocks -->
-        <div class="two-col">
-          <!-- Win Rate -->
-          <div class="section-card">
-            <h3>Win Rate</h3>
+        <section class="grid-two">
+          <app-chart-card title="Win Rate" meta="Winning versus losing trades">
             @if (winRate) {
               <div class="win-rate-display">
-                <div class="win-rate-circle">
-                  <svg viewBox="0 0 100 100" class="circle-chart">
-                    <circle cx="50" cy="50" r="42" fill="none" stroke="#f0f0f0" stroke-width="8"/>
-                    <circle cx="50" cy="50" r="42" fill="none" stroke="#00c853" stroke-width="8"
-                            stroke-linecap="round"
-                            [attr.stroke-dasharray]="getCircleDash(winRate.winRate)"
-                            stroke-dashoffset="0"
-                            transform="rotate(-90 50 50)"/>
-                    <text x="50" y="50" text-anchor="middle" dominant-baseline="central"
-                          font-size="18" font-weight="700" fill="#1a1a2e">
-                      {{ winRate.winRate | number:'1.1-1' }}%
-                    </text>
-                  </svg>
+                <div
+                  class="win-rate-ring"
+                  [class.zero]="winRate.winRate <= 0"
+                  [style.--progress-angle]="(winRate.winRate * 3.6) + 'deg'">
+                  <div class="win-rate-core">
+                    <strong>{{ winRate.winRate | number:'1.1-1' }}%</strong>
+                    <span class="ring-caption">Win Rate</span>
+                  </div>
                 </div>
                 <div class="win-stats">
-                  <div class="win-stat">
-                    <span class="stat-dot win"></span>
-                    <span>Winning: {{ winRate.winningTrades }}</span>
-                  </div>
-                  <div class="win-stat">
-                    <span class="stat-dot lose"></span>
-                    <span>Losing: {{ winRate.losingTrades }}</span>
-                  </div>
-                  <div class="win-stat">
-                    <span class="stat-dot neutral"></span>
-                    <span>Total: {{ winRate.totalTrades }}</span>
-                  </div>
+                  <div class="win-stat"><span class="stat-dot win"></span>Winning: {{ winRate.winningTrades }}</div>
+                  <div class="win-stat"><span class="stat-dot lose"></span>Losing: {{ winRate.losingTrades }}</div>
+                  <div class="win-stat"><span class="stat-dot neutral"></span>Total: {{ winRate.totalTrades }}</div>
                 </div>
               </div>
             }
-          </div>
+          </app-chart-card>
 
-          <!-- Asset Allocation -->
-          <div class="section-card">
-            <h3>Investment Distribution</h3>
+          <app-chart-card title="Investment Distribution" meta="Allocation by asset type">
             @if (allocationChartData.labels && allocationChartData.labels.length > 0) {
               <div class="chart-wrapper">
-                <canvas baseChart
-                  [data]="allocationChartData"
-                  [options]="pieOptions"
-                  type="pie">
-                </canvas>
+                <canvas baseChart [data]="allocationChartData" [options]="pieOptions" type="pie"></canvas>
               </div>
             } @else {
-              <div class="empty-chart">
-                <span>📊</span>
-                <p>No allocation data available</p>
-              </div>
+              <app-empty-state title="No allocation data" message="Add holdings to view your allocation" icon="pie-chart"></app-empty-state>
             }
-          </div>
-        </div>
+          </app-chart-card>
+        </section>
 
-        <!-- Top/Bottom Performers -->
-        <div class="two-col">
-          <div class="section-card">
-            <h3>🏆 Top Performers</h3>
+        <section class="grid-two">
+          <app-chart-card title="Top Performers" meta="Best P&L contributors">
             @if (topPerformers.length > 0) {
               <div class="performer-list">
                 @for (h of topPerformers; track h.id) {
-                  <div class="performer-item">
-                    <div class="performer-info">
-                      <span class="symbol-tag">{{ h.symbol }}</span>
-                      <span class="performer-qty">{{ h.quantity }} shares</span>
+                  <article class="performer-item">
+                    <div>
+                      <span class="symbol-pill">{{ h.symbol }}</span>
+                      <small>{{ h.quantity }} shares</small>
                     </div>
-                    <div class="performer-pnl">
-                      <span class="positive">+{{ h.pnLPercentage | number:'1.2-2' }}%</span>
-                      <span class="performer-val positive">{{ h.pnL | inr }}</span>
+                    <div class="performer-meta">
+                      <span class="profit">+{{ h.pnLPercentage | number:'1.2-2' }}%</span>
+                      <span class="profit">{{ h.pnL | inr }}</span>
                     </div>
-                  </div>
+                  </article>
                 }
               </div>
             } @else {
-              <p class="no-data">No profitable holdings yet</p>
+              <app-empty-state title="No profitable holdings" message="Performance leaders appear here once your positions gain." icon="trending-up"></app-empty-state>
             }
-          </div>
+          </app-chart-card>
 
-          <div class="section-card">
-            <h3>📉 Loss-Making Stocks</h3>
+          <app-chart-card title="Loss-Making Stocks" meta="Positions to monitor closely">
             @if (bottomPerformers.length > 0) {
               <div class="performer-list">
                 @for (h of bottomPerformers; track h.id) {
-                  <div class="performer-item">
-                    <div class="performer-info">
-                      <span class="symbol-tag">{{ h.symbol }}</span>
-                      <span class="performer-qty">{{ h.quantity }} shares</span>
+                  <article class="performer-item">
+                    <div>
+                      <span class="symbol-pill loss-pill">{{ h.symbol }}</span>
+                      <small>{{ h.quantity }} shares</small>
                     </div>
-                    <div class="performer-pnl">
-                      <span class="negative">{{ h.pnLPercentage | number:'1.2-2' }}%</span>
-                      <span class="performer-val negative">{{ h.pnL | inr }}</span>
+                    <div class="performer-meta loss-meta">
+                      <span class="loss">{{ h.pnLPercentage | number:'1.2-2' }}%</span>
+                      <span class="loss">{{ h.pnL | inr }}</span>
                     </div>
-                  </div>
+                  </article>
                 }
               </div>
             } @else {
-              <p class="no-data">No loss-making holdings 🎉</p>
+              <app-empty-state title="No loss-making positions" message="Great momentum. Your negative performers list is empty." icon="trophy"></app-empty-state>
             }
-          </div>
-        </div>
+          </app-chart-card>
+        </section>
       }
     </div>
   `,
-  styles: [`
-    .analytics-page { max-width: 1200px; margin: 0 auto; }
-    .page-header { 
-      margin-bottom: 24px; 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: flex-start; 
-    }
-    .header-left h2 { font-size: 24px; color: #1a1a2e; margin: 0; }
-    .header-left .subtitle { color: #666; font-size: 14px; margin-top: 4px; }
-    .header-right { display: flex; align-items: center; gap: 12px; }
-    
-    .live-indicator { 
-      display: flex; 
-      align-items: center; 
-      gap: 6px; 
-      color: #00c853; 
-      font-weight: 600; 
-      font-size: 12px; 
-    }
-    .live-dot { 
-      width: 8px; 
-      height: 8px; 
-      background: #00c853; 
-      border-radius: 50%; 
-      animation: pulse 1.5s infinite; 
-    }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-    
-    .refresh-btn {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 14px;
-      background: #fff;
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 500;
-      color: #555;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .refresh-btn:hover:not(:disabled) {
-      background: #f7f8fa;
-      border-color: #3a7bd5;
-      color: #3a7bd5;
-    }
-    .refresh-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-    .refresh-icon { font-size: 14px; display: inline-block; }
-    .refresh-icon.spinning { animation: spin 1s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+  styles: [
+    `
+      .analytics-page {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: grid;
+        gap: var(--space-5);
+      }
+      .page-header {
+        display: flex;
+        justify-content: space-between;
+        gap: var(--space-4);
+      }
+      h2 {
+        margin: 0;
+        font-size: 22px;
+      }
+      .subtitle {
+        margin: var(--space-1) 0 0;
+        color: var(--color-text-secondary);
+      }
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+      }
+      .live-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+        color: var(--color-profit);
+        font-weight: 600;
+      }
+      .live-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--color-profit);
+        animation: pulse 1.8s infinite ease;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.45;
+        }
+      }
+      .refresh-btn {
+        border: 1px solid var(--color-border-soft);
+        background: var(--surface-elevated);
+        color: var(--color-text-primary);
+        border-radius: var(--radius-sm);
+        padding: 8px 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+        cursor: pointer;
+      }
+      .refresh-btn:disabled {
+        opacity: 0.6;
+      }
+      .period-selector {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-2);
+        margin-bottom: var(--space-4);
+      }
+      .period-btn {
+        border: 1px solid var(--color-border-soft);
+        background: var(--surface-muted-3);
+        color: var(--color-text-secondary);
+        border-radius: 999px;
+        padding: 6px 12px;
+        cursor: pointer;
+      }
+      .period-btn.active {
+        border-color: var(--color-primary);
+        background: var(--overlay-primary-24);
+        color: var(--color-text-primary);
+      }
+      .pnl-cards {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: var(--space-3);
+        align-items: stretch;
+      }
+      .pnl-card {
+        background: var(--surface-muted-3);
+        border: 1px solid var(--color-border-soft);
+        border-radius: var(--radius-md);
+        padding: var(--space-4);
+        display: grid;
+        gap: var(--space-1);
+      }
+      .pnl-card span,
+      .pnl-card small {
+        color: var(--color-text-secondary);
+      }
+      .pnl-card strong {
+        font-size: 1.4rem;
+      }
+      .profit {
+        color: var(--color-profit);
+      }
+      .loss {
+        color: var(--color-loss);
+      }
+      .grid-two {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--space-5);
+        align-items: stretch;
+      }
+      .win-rate-display {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-5);
+      }
 
-    .loading-state {
-      display: flex; flex-direction: column; align-items: center;
-      padding: 80px 0; color: #888;
-    }
-    .loader {
-      width: 40px; height: 40px;
-      border: 4px solid #e8ecf0; border-top-color: #3a7bd5;
-      border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
+      .win-rate-ring {
+        --progress-angle: 0deg;
+        width: 176px;
+        height: 176px;
+        border-radius: 50%;
+        padding: 12px;
+        display: grid;
+        place-items: center;
+        background: conic-gradient(var(--color-primary) var(--progress-angle), var(--border-text-soft) 0);
+        box-shadow: inset 0 0 0 1px var(--color-border-muted);
+      }
 
-    .section-card {
-      background: #fff; border-radius: 16px; padding: 24px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #f0f0f0;
-      margin-bottom: 20px;
-    }
-    .section-card h3 { font-size: 16px; color: #1a1a2e; margin: 0 0 16px 0; }
-    .section-header {
-      display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
-    }
-    .section-header h3 { margin-bottom: 0; }
+      .win-rate-ring.zero {
+        background: conic-gradient(var(--border-text-soft) 360deg);
+      }
 
-    .period-selector { display: flex; gap: 4px; }
-    .period-btn {
-      padding: 6px 14px; border: 1px solid #e0e0e0; border-radius: 6px;
-      background: #fff; color: #555; font-size: 12px; font-weight: 500;
-      cursor: pointer; transition: all 0.2s;
-    }
-    .period-btn.active {
-      background: #1a1a2e; color: #fff; border-color: #1a1a2e;
-    }
+      .win-rate-core {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: radial-gradient(circle at 30% 20%, rgba(37, 99, 235, 0.08), transparent 50%), var(--color-card);
+        border: 1px solid var(--color-border-soft);
+        display: grid;
+        place-items: center;
+        align-content: center;
+        gap: 6px;
+      }
 
-    .pnl-cards {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
-    }
-    .pnl-card {
-      background: #f7f8fa; padding: 20px; border-radius: 12px;
-      display: flex; flex-direction: column; gap: 6px;
-    }
-    .pnl-card-label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
-    .pnl-card-value { font-size: 22px; font-weight: 700; }
-    .pnl-card-pct { font-size: 13px; font-weight: 600; }
-    .pnl-card-sub { font-size: 12px; color: #aaa; }
+      .win-rate-core strong {
+        font-size: 2.15rem;
+        color: var(--color-text-primary);
+        line-height: 1;
+      }
 
-    .positive { color: #00c853; }
-    .negative { color: #ff5252; }
+      .ring-caption {
+        font-size: 0.72rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--color-text-secondary);
+      }
+      .win-stats {
+        display: grid;
+        gap: var(--space-2);
+      }
+      .win-stat {
+        color: var(--color-text-secondary);
+      }
+      .stat-dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: var(--space-2);
+      }
+      .stat-dot.win {
+        background: var(--color-profit);
+      }
+      .stat-dot.lose {
+        background: rgba(239, 68, 68, 0.78);
+      }
+      .stat-dot.neutral {
+        background: var(--color-text-secondary);
+      }
+      .chart-wrapper {
+        max-height: 260px;
+      }
+      .performer-list {
+        display: grid;
+        gap: var(--space-2);
+      }
+      .performer-item {
+        border: 1px solid var(--color-border-soft);
+        border-radius: var(--radius-sm);
+        background: var(--surface-muted-3);
+        padding: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .symbol-pill {
+        display: inline-flex;
+        margin-right: var(--space-2);
+        padding: 2px 8px;
+        border-radius: 999px;
+        background: var(--overlay-primary-18);
+        color: var(--color-text-primary);
+        font-weight: 600;
+      }
+      .performer-item small {
+        color: var(--color-text-secondary);
+      }
+      .performer-meta {
+        display: grid;
+        text-align: right;
+      }
 
-    .two-col {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
-    }
+      .loss-pill {
+        background: rgba(239, 68, 68, 0.14);
+      }
 
-    .win-rate-display {
-      display: flex; align-items: center; gap: 32px; justify-content: center;
-    }
-    .win-rate-circle { width: 140px; height: 140px; }
-    .circle-chart { width: 100%; height: 100%; }
-    .win-stats { display: flex; flex-direction: column; gap: 12px; }
-    .win-stat {
-      display: flex; align-items: center; gap: 8px; font-size: 14px; color: #555;
-    }
-    .stat-dot {
-      width: 10px; height: 10px; border-radius: 50%;
-    }
-    .stat-dot.win { background: #00c853; }
-    .stat-dot.lose { background: #ff5252; }
-    .stat-dot.neutral { background: #ccc; }
+      .loss-meta .loss {
+        color: rgba(239, 68, 68, 0.82);
+      }
+      .loading-state {
+        display: grid;
+        justify-items: center;
+        gap: var(--space-3);
+        padding: var(--space-10) 0;
+        color: var(--color-text-secondary);
+      }
+      .loader {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 3px solid var(--border-text-soft);
+        border-top-color: var(--color-primary);
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @media (max-width: 1024px) {
+        .pnl-cards,
+        .grid-two {
+          grid-template-columns: 1fr;
+        }
 
-    .chart-wrapper { max-height: 240px; display: flex; justify-content: center; }
-    .empty-chart {
-      display: flex; flex-direction: column; align-items: center;
-      padding: 40px 0; color: #888;
-    }
-    .empty-chart span { font-size: 36px; margin-bottom: 8px; }
+        .win-rate-ring {
+          width: 160px;
+          height: 160px;
+        }
 
-    .performer-list { display: flex; flex-direction: column; gap: 10px; }
-    .performer-item {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 12px; background: #f7f8fa; border-radius: 10px;
-    }
-    .performer-info { display: flex; align-items: center; gap: 10px; }
-    .symbol-tag {
-      background: #e8f4fd; color: #3a7bd5; padding: 4px 10px;
-      border-radius: 6px; font-weight: 600; font-size: 12px;
-    }
-    .performer-qty { font-size: 12px; color: #888; }
-    .performer-pnl { text-align: right; display: flex; flex-direction: column; gap: 2px; }
-    .performer-pnl span:first-child { font-size: 14px; font-weight: 600; }
-    .performer-val { font-size: 12px; }
-    .no-data { text-align: center; color: #aaa; padding: 20px 0; }
+        .win-rate-core strong {
+          font-size: 1.9rem;
+        }
+      }
+      @media (max-width: 700px) {
+        .page-header {
+          flex-direction: column;
+        }
 
-    @media (max-width: 900px) {
-      .two-col { grid-template-columns: 1fr; }
-      .pnl-cards { grid-template-columns: 1fr; }
-    }
-  `]
+        .win-rate-display {
+          flex-direction: column;
+          gap: var(--space-4);
+        }
+
+        .win-rate-ring {
+          width: 148px;
+          height: 148px;
+        }
+
+        .win-rate-core strong {
+          font-size: 1.7rem;
+        }
+      }
+    `
+  ]
 })
 export class AnalyticsComponent implements OnInit, OnDestroy {
   loading = true;
@@ -349,14 +453,17 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
   periods = ['daily', 'weekly', 'monthly', 'yearly'];
 
   private refreshSubscription?: Subscription;
-  private readonly REFRESH_INTERVAL = 1000; // 1 second
+  private readonly REFRESH_INTERVAL = 20000;
 
   allocationChartData: ChartData<'pie'> = { labels: [], datasets: [] };
   pieOptions: ChartConfiguration<'pie'>['options'] = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true, font: { size: 12 } } }
+      legend: {
+        position: 'bottom',
+        labels: { color: FINTECH_CHART_LABEL_COLOR, padding: 16, usePointStyle: true, font: { size: 12 } }
+      }
     }
   };
 
@@ -368,8 +475,6 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadData();
-    
-    // Auto-refresh every 1 second for live data
     this.refreshSubscription = interval(this.REFRESH_INTERVAL).subscribe(() => {
       this.loadData();
     });
@@ -384,7 +489,7 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
       pnl: this.portfolioService.getPnL(this.selectedPeriod),
       winRate: this.portfolioService.getWinRate(),
       holdings: this.holdingsService.getHoldings(),
-      allocation: this.analyticsService.getAssetAllocation(),
+      allocation: this.analyticsService.getAssetAllocation()
     }).subscribe({
       next: (res) => {
         this.pnlData = res.pnl.data;
@@ -395,7 +500,9 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
         this.buildAllocationChart();
         this.loading = false;
       },
-      error: () => { this.loading = false; }
+      error: () => {
+        this.loading = false;
+      }
     });
   }
 
@@ -407,28 +514,45 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
   changePeriod(period: string): void {
     this.selectedPeriod = period;
     this.portfolioService.getPnL(period).subscribe({
-      next: (res) => { this.pnlData = res.data; }
+      next: (res) => {
+        this.pnlData = res.data;
+      }
     });
   }
 
   computePerformers(): void {
     const sorted = [...this.holdings].sort((a, b) => b.pnLPercentage - a.pnLPercentage);
-    this.topPerformers = sorted.filter(h => h.pnL > 0).slice(0, 5);
-    this.bottomPerformers = sorted.filter(h => h.pnL < 0).reverse().slice(0, 5);
+    this.topPerformers = sorted.filter((h) => h.pnL > 0).slice(0, 5);
+    this.bottomPerformers = sorted.filter((h) => h.pnL < 0).reverse().slice(0, 5);
   }
 
   buildAllocationChart(): void {
     const keys = Object.keys(this.allocationData);
-    if (!keys.length) return;
-    const colors = ['#3a7bd5', '#00c853', '#ff9800', '#7c4dff', '#ff5252', '#26c6da'];
+    if (!keys.length) {
+      return;
+    }
+
+    const allocationColorMap: Record<string, string> = {
+      stocks: '#2563eb',
+      equity: '#1d4ed8',
+      bonds: '#94a3b8',
+      debt: '#64748b',
+      cash: '#22c55e',
+      gold: '#334155'
+    };
+
+    const fallbackColors = ['#2563eb', '#1d4ed8', '#94a3b8', '#22c55e', '#334155'];
+
     this.allocationChartData = {
-      labels: keys.map(k => k.charAt(0).toUpperCase() + k.slice(1)),
-      datasets: [{
-        data: keys.map(k => this.allocationData[k].percentage),
-        backgroundColor: colors.slice(0, keys.length),
-        borderWidth: 2,
-        borderColor: '#fff',
-      }]
+      labels: keys.map((k) => k.charAt(0).toUpperCase() + k.slice(1)),
+      datasets: [
+        {
+          data: keys.map((k) => this.allocationData[k].percentage),
+          backgroundColor: keys.map((k, i) => allocationColorMap[k.toLowerCase()] || fallbackColors[i % fallbackColors.length]),
+          borderWidth: 2,
+          borderColor: '#1e293b'
+        }
+      ]
     };
   }
 

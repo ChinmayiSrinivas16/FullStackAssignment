@@ -1,28 +1,27 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { SidebarItemComponent } from '../sidebar-item/sidebar-item.component';
 
 interface NavItem {
   label: string;
   icon: string;
   route: string;
+  exact?: boolean;
 }
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive],
+  imports: [CommonModule, SidebarItemComponent],
   template: `
     <aside class="sidebar">
       <nav class="sidebar-nav">
         @for (item of navItems; track item.route) {
-          <a class="nav-item"
-             [routerLink]="item.route"
-             routerLinkActive="active"
-             [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }">
-            <span class="nav-icon">{{ item.icon }}</span>
-            <span class="nav-label">{{ item.label }}</span>
-          </a>
+          <app-sidebar-item
+            [route]="item.route"
+            [label]="item.label"
+            [icon]="item.icon"
+            [exact]="item.exact ?? false"></app-sidebar-item>
         }
       </nav>
       <div class="sidebar-footer">
@@ -40,64 +39,37 @@ interface NavItem {
       position: fixed;
       top: 64px;
       left: 0;
-      background: linear-gradient(180deg, #1a1a2e 0%, #0f0f23 100%);
+      background: var(--color-sidebar);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      padding: 16px 0;
+      padding: var(--space-4) 0;
       z-index: 999;
-      border-right: 1px solid rgba(255,255,255,0.05);
+      border-right: 1px solid var(--color-border);
+      transition: transform 0.25s ease;
     }
     .sidebar-nav {
       display: flex;
       flex-direction: column;
-      gap: 4px;
-      padding: 0 12px;
+      gap: var(--space-1);
+      padding: 0 var(--space-3);
     }
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 16px;
-      color: #8892b0;
-      text-decoration: none;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 500;
-      transition: all 0.2s;
-    }
-    .nav-item:hover {
-      background: rgba(0,210,255,0.08);
-      color: #ccd6f6;
-    }
-    .nav-item.active {
-      background: linear-gradient(135deg, rgba(0,210,255,0.15), rgba(58,123,213,0.15));
-      color: #00d2ff;
-      font-weight: 600;
-    }
-    .nav-item.active .nav-icon {
-      transform: scale(1.1);
-    }
-    .nav-icon {
-      font-size: 18px;
-      width: 24px;
-      text-align: center;
-      transition: transform 0.2s;
-    }
-    .nav-label { letter-spacing: 0.3px; }
     .sidebar-footer {
-      padding: 16px 24px;
-      border-top: 1px solid rgba(255,255,255,0.05);
+      padding: var(--space-4) var(--space-5);
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      justify-content: center;
     }
     .market-status {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: var(--space-2);
+      padding-top: 2px;
     }
     .status-dot {
       width: 8px;
       height: 8px;
-      background: #00e676;
+      background: var(--color-profit);
       border-radius: 50%;
       animation: pulse 2s infinite;
     }
@@ -106,18 +78,43 @@ interface NavItem {
       50% { opacity: 0.5; }
     }
     .status-text {
-      font-size: 12px;
-      color: #8892b0;
+      font-size: 0.8rem;
+      color: var(--color-text-secondary);
+    }
+
+    @media (max-width: 900px) {
+      .sidebar {
+        width: 100%;
+        height: auto;
+        top: auto;
+        bottom: 0;
+        padding: var(--space-2) var(--space-3);
+        border-right: 0;
+        border-top: 1px solid var(--color-border);
+        transform: none;
+      }
+
+      .sidebar-nav {
+        flex-direction: row;
+        overflow-x: auto;
+        gap: var(--space-2);
+        padding: 0;
+      }
+
+      .sidebar-footer {
+        display: none;
+      }
     }
   `]
 })
 export class SidebarComponent {
   navItems: NavItem[] = [
-    { label: 'Dashboard', icon: '📊', route: '/dashboard' },
-    { label: 'Holdings', icon: '💼', route: '/holdings' },
-    { label: 'Transactions', icon: '🔄', route: '/transactions' },
-    { label: 'Market Data', icon: '📈', route: '/market' },
-    { label: 'Analytics', icon: '📉', route: '/analytics' },
-    { label: 'Reports', icon: '📋', route: '/reports' },
+    { label: 'Dashboard', icon: 'layout-dashboard', route: '/dashboard', exact: true },
+    { label: 'Holdings', icon: 'briefcase', route: '/holdings' },
+    { label: 'Transactions', icon: 'receipt', route: '/transactions' },
+    { label: 'Market Data', icon: 'line-chart', route: '/market' },
+    { label: 'Analytics', icon: 'bar-chart', route: '/analytics' },
+    { label: 'Reports', icon: 'file-text', route: '/reports' },
+    { label: 'Wallet', icon: 'wallet', route: '/wallet' }
   ];
 }

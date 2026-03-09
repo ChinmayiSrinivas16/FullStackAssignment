@@ -1,0 +1,39 @@
+/stockfolio-ui/stockfolio-ui/src/app/shared/components/chart-card/chart-card.component.scss
+
+.chart-card {
+    background-color: $card-background; // Use card background color from design tokens
+    border-radius: $border-radius; // Use border radius from design tokens
+    box-shadow: $shadow-elevation; // Use shadow from design tokens
+    padding: $spacing-medium; // Use spacing from design tokens
+    margin: $spacing-small; // Use spacing from design tokens
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    
+    .chart-title {
+        font-size: $font-size-large; // Use typography size from design tokens
+        font-weight: $font-weight-bold; // Use typography weight from design tokens
+        color: $text-color; // Use text color from design tokens
+        margin-bottom: $spacing-small; // Use spacing from design tokens
+    }
+
+    .chart-container {
+        flex-grow: 1;
+        position: relative;
+        overflow: hidden;
+        border-radius: $border-radius; // Ensure chart has rounded corners
+    }
+
+    .chart-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: $spacing-small; // Use spacing from design tokens
+
+        .footer-text {
+            font-size: $font-size-small; // Use typography size from design tokens
+            color: $text-color; // Use text color from design tokens
+        }
+    }
+}

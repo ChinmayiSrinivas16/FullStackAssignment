@@ -1,0 +1,8 @@
+<div class="sidebar-item" [routerLink]="item.route" routerLinkActive="active">
+  <div class="icon">
+    <ng-container *ngIf="item.icon">
+      <svg-icon [src]="item.icon"></svg-icon>
+    </ng-container>
+  </div>
+  <span class="label">{{ item.label }}</span>
+</div>

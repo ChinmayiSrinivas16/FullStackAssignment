@@ -1,0 +1,35 @@
+@import '~src/app/core/design-tokens/_colors.scss';
+@import '~src/app/core/design-tokens/_spacing.scss';
+@import '~src/app/core/design-tokens/_typography.scss';
+@import '~src/app/core/design-tokens/_radius.scss';
+
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    padding: spacing(2);
+    border-radius: radius(4);
+    color: colors(text);
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+        background-color: colors(sidebar);
+    }
+
+    &.active {
+        background-color: colors(primary);
+        color: colors(background);
+    }
+
+    .icon {
+        margin-right: spacing(2);
+        width: 24px;
+        height: 24px;
+        fill: currentColor;
+    }
+
+    .label {
+        font-size: typography(fontSizeMedium);
+        font-weight: typography(fontWeightBold);
+    }
+}

@@ -1,0 +1,61 @@
+@import '../app/core/design-tokens/index';
+
+.utility-margin {
+    margin: $spacing-small;
+}
+
+.utility-padding {
+    padding: $spacing-small;
+}
+
+.utility-text-center {
+    text-align: center;
+}
+
+.utility-flex {
+    display: flex;
+}
+
+.utility-flex-column {
+    flex-direction: column;
+}
+
+.utility-hidden {
+    display: none;
+}
+
+.utility-visible {
+    display: block;
+}
+
+.utility-border {
+    border: 1px solid $color-border;
+}
+
+.utility-border-radius {
+    border-radius: $radius-small;
+}
+
+.utility-shadow {
+    box-shadow: $shadow-small;
+}
+
+.utility-bg-primary {
+    background-color: $color-primary;
+}
+
+.utility-bg-secondary {
+    background-color: $color-background;
+}
+
+.utility-text-primary {
+    color: $color-text;
+}
+
+.utility-text-profit {
+    color: $color-profit;
+}
+
+.utility-text-loss {
+    color: $color-loss;
+}

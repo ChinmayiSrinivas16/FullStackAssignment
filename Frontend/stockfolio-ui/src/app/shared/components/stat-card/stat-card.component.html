@@ -1,0 +1,16 @@
+<div class="stat-card">
+  <div class="stat-card-header">
+    <h3 class="stat-card-title">{{ title }}</h3>
+    <div class="stat-card-icon">
+      <ng-container *ngIf="icon">
+        <svg-icon [name]="icon"></svg-icon>
+      </ng-container>
+    </div>
+  </div>
+  <div class="stat-card-body">
+    <p class="stat-card-value">{{ value | number }}</p>
+    <p class="stat-card-change" [ngClass]="{'positive': change >= 0, 'negative': change < 0}">
+      {{ change | number }} ({{ changePercent | number: '1.0-2' }}%)
+    </p>
+  </div>
+</div>

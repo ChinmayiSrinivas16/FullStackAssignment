@@ -1,0 +1,47 @@
+@import '../app/core/design-tokens/index';
+
+$theme-background: map-get($colors, background);
+$theme-primary: map-get($colors, primary);
+$theme-sidebar: map-get($colors, sidebar);
+$theme-card: map-get($colors, card);
+$theme-border: map-get($colors, border);
+$theme-text: map-get($colors, text);
+$theme-profit: map-get($colors, profit);
+$theme-loss: map-get($colors, loss);
+
+body {
+    background-color: $theme-background;
+    color: $theme-text;
+    font-family: 'Roboto', sans-serif;
+}
+
+.sidebar {
+    background-color: $theme-sidebar;
+}
+
+.card {
+    background-color: $theme-card;
+    border: 1px solid $theme-border;
+    border-radius: $radius-default;
+    box-shadow: $shadow-default;
+}
+
+.stat-card {
+    @extend .card;
+}
+
+.chart-card {
+    @extend .card;
+}
+
+.empty-state {
+    text-align: center;
+    color: $theme-text;
+}
+
+.sidebar-item {
+    color: $theme-text;
+    &:hover {
+        background-color: $theme-primary;
+    }
+}

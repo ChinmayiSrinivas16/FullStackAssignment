@@ -1,0 +1,20 @@
+$primary-color: #007bff; // Primary color for buttons and links
+$background-color: #f8f9fa; // Background color for the application
+$sidebar-color: #343a40; // Color for the sidebar
+$card-background-color: #ffffff; // Background color for cards
+$border-color: #dee2e6; // Border color for components
+$text-color: #212529; // Default text color
+$profit-color: #28a745; // Color for profit indicators
+$loss-color: #dc3545; // Color for loss indicators
+
+// Exporting the color variables for use in other styles
+:root {
+    --primary-color: #{$primary-color};
+    --background-color: #{$background-color};
+    --sidebar-color: #{$sidebar-color};
+    --card-background-color: #{$card-background-color};
+    --border-color: #{$border-color};
+    --text-color: #{$text-color};
+    --profit-color: #{$profit-color};
+    --loss-color: #{$loss-color};
+}

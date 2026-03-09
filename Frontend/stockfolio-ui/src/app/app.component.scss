@@ -1,0 +1,30 @@
+@import '../core/design-tokens/index';
+
+:host {
+    display: block;
+    font-family: var(--font-family);
+    color: var(--text-color);
+    background-color: var(--background-color);
+    padding: var(--spacing-medium);
+}
+
+.header {
+    background-color: var(--primary-color);
+    padding: var(--spacing-large);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-elevation);
+}
+
+.main-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--spacing-large);
+}
+
+.footer {
+    background-color: var(--sidebar-color);
+    padding: var(--spacing-medium);
+    border-top: 1px solid var(--border-color);
+    text-align: center;
+}

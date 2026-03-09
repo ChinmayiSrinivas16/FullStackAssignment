@@ -1,0 +1,42 @@
+@import './_theme.scss';
+@import './_utilities.scss';
+@import '../app/core/design-tokens/index.scss'; 
+
+body {
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', sans-serif;
+}
+
+a {
+    text-decoration: none;
+    color: var(--primary-color);
+}
+
+button {
+    border: none;
+    cursor: pointer;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.flex {
+    display: flex;
+}
+
+.grid {
+    display: grid;
+}
+
+.hidden {
+    display: none;
+}

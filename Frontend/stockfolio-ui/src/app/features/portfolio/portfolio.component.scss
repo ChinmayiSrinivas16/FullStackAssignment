@@ -1,0 +1,55 @@
+@import 'src/app/core/design-tokens/index';
+
+.portfolio-container {
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacing-lg);
+    background-color: var(--color-background);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-elevation-1);
+}
+
+.portfolio-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.portfolio-title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+}
+
+.portfolio-summary {
+    display: flex;
+    justify-content: space-around;
+    margin-top: var(--spacing-md);
+}
+
+.portfolio-chart {
+    margin-top: var(--spacing-lg);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--color-text-muted);
+}
+
+.empty-state-icon {
+    width: 50px;
+    height: 50px;
+    margin-bottom: var(--spacing-md);
+}
+
+.empty-state-message {
+    font-size: var(--font-size-lg);
+    text-align: center;
+}

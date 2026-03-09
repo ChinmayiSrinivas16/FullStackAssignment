@@ -1,0 +1,39 @@
+$font-size-base: 16px;
+$font-size-sm: 14px;
+$font-size-lg: 18px;
+$font-size-xl: 24px;
+
+$font-weight-normal: 400;
+$font-weight-bold: 700;
+
+$line-height-normal: 1.5;
+$line-height-heading: 1.2;
+
+body {
+  font-size: $font-size-base;
+  font-weight: $font-weight-normal;
+  line-height: $line-height-normal;
+}
+
+h1 {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  line-height: $line-height-heading;
+}
+
+h2 {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  line-height: $line-height-heading;
+}
+
+h3 {
+  font-size: $font-size-base;
+  font-weight: $font-weight-bold;
+  line-height: $line-height-heading;
+}
+
+p {
+  font-size: $font-size-base;
+  line-height: $line-height-normal;
+}

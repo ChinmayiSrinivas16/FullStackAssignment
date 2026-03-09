@@ -3,17 +3,18 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { IconComponent } from '../../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, IconComponent],
   template: `
     <div class="auth-container">
       <div class="auth-card">
         <div class="auth-header">
           <div class="logo">
-            <span class="logo-icon">📈</span>
+            <span class="logo-icon"><app-icon name="activity" [size]="28"></app-icon></span>
             <h1>StockFolio</h1>
           </div>
           <p class="subtitle">Indian Stock Portfolio Manager</p>
@@ -27,7 +28,7 @@ import { AuthService } from '../../../core/services/auth.service';
           <div class="form-group">
             <label for="username">Username</label>
             <div class="input-wrapper">
-              <span class="input-icon">👤</span>
+              <span class="input-icon"><app-icon name="user" [size]="16"></app-icon></span>
               <input
                 id="username"
                 type="text"
@@ -41,7 +42,7 @@ import { AuthService } from '../../../core/services/auth.service';
           <div class="form-group">
             <label for="password">Password</label>
             <div class="input-wrapper">
-              <span class="input-icon">🔒</span>
+              <span class="input-icon"><app-icon name="lock" [size]="16"></app-icon></span>
               <input
                 id="password"
                 [type]="showPassword ? 'text' : 'password'"
@@ -50,7 +51,7 @@ import { AuthService } from '../../../core/services/auth.service';
                 placeholder="Enter your password"
                 required />
               <button type="button" class="toggle-pwd" (click)="showPassword = !showPassword">
-                {{ showPassword ? '🙈' : '👁️' }}
+                <app-icon [name]="showPassword ? 'eye-off' : 'eye'" [size]="16"></app-icon>
               </button>
             </div>
           </div>
@@ -76,10 +77,10 @@ import { AuthService } from '../../../core/services/auth.service';
       <div class="auth-info">
         <h2>Track Your Investments</h2>
         <ul>
-          <li>📊 Real-time portfolio tracking</li>
-          <li>💹 P&L analytics & insights</li>
-          <li>📋 Transaction history management</li>
-          <li>📈 Indian stock market (NSE/BSE)</li>
+          <li><app-icon name="bar-chart-3" [size]="16"></app-icon>Real-time portfolio tracking</li>
+          <li><app-icon name="line-chart" [size]="16"></app-icon>P&L analytics and insights</li>
+          <li><app-icon name="file-text" [size]="16"></app-icon>Transaction history management</li>
+          <li><app-icon name="activity" [size]="16"></app-icon>Indian stock market (NSE/BSE)</li>
         </ul>
       </div>
     </div>
@@ -88,53 +89,57 @@ import { AuthService } from '../../../core/services/auth.service';
     .auth-container {
       display: flex;
       min-height: 100vh;
-      background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+      background:
+        radial-gradient(circle at 85% 20%, rgba(37, 99, 235, 0.26), transparent 35%),
+        linear-gradient(160deg, var(--color-bg) 0%, var(--color-bg) 100%);
     }
     .auth-card {
       width: 480px;
       margin: auto;
-      padding: 48px;
-      background: #fff;
-      border-radius: 20px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      padding: var(--space-10);
+      background: var(--surface-strong);
+      border: 1px solid var(--color-border-soft);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
     }
     .auth-header {
       text-align: center;
-      margin-bottom: 32px;
+      margin-bottom: var(--space-8);
     }
     .logo {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 12px;
+      gap: var(--space-3);
     }
-    .logo-icon { font-size: 36px; }
+    .logo-icon {
+      color: var(--color-primary);
+      display: inline-flex;
+    }
     .logo h1 {
-      font-size: 28px;
+      font-size: 1.8rem;
       margin: 0;
-      background: linear-gradient(135deg, #1a1a2e, #3a7bd5);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: var(--color-text-primary);
     }
     .subtitle {
-      color: #666;
-      margin-top: 8px;
+      color: var(--color-text-secondary);
+      margin-top: var(--space-2);
       font-size: 14px;
     }
     .market-badges {
       display: flex;
       gap: 8px;
       justify-content: center;
-      margin-top: 12px;
+      margin-top: var(--space-3);
     }
     .badge {
-      background: linear-gradient(135deg, #00d2ff, #3a7bd5);
-      color: #fff;
+      background: var(--overlay-primary-20);
+      color: var(--color-text-primary);
       padding: 4px 14px;
-      border-radius: 12px;
+      border-radius: 999px;
       font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 1px;
+      font-weight: 600;
+      letter-spacing: 0.7px;
     }
     .auth-form {
       display: flex;
@@ -146,22 +151,26 @@ import { AuthService } from '../../../core/services/auth.service';
       margin-bottom: 6px;
       font-size: 13px;
       font-weight: 600;
-      color: #333;
+      color: var(--color-text-primary);
     }
     .input-wrapper {
       display: flex;
       align-items: center;
-      background: #f7f8fa;
-      border: 2px solid #e8ecf0;
-      border-radius: 12px;
+      background: var(--surface-muted);
+      border: 1px solid var(--color-border-soft);
+      border-radius: var(--radius-md);
       padding: 0 14px;
-      transition: border-color 0.2s;
+      transition: border-color 0.2s, background-color 0.2s;
     }
     .input-wrapper:focus-within {
-      border-color: #3a7bd5;
-      background: #fff;
+      border-color: var(--color-primary);
+      background: var(--surface-muted-strong);
     }
-    .input-icon { font-size: 16px; margin-right: 10px; }
+    .input-icon {
+      color: var(--color-text-secondary);
+      margin-right: 10px;
+      display: inline-flex;
+    }
     .input-wrapper input {
       flex: 1;
       border: none;
@@ -169,30 +178,43 @@ import { AuthService } from '../../../core/services/auth.service';
       padding: 14px 0;
       font-size: 14px;
       outline: none;
-      color: #333;
+      color: var(--color-text-primary);
+      caret-color: var(--color-text-primary);
+    }
+    .input-wrapper input:-webkit-autofill,
+    .input-wrapper input:-webkit-autofill:hover,
+    .input-wrapper input:-webkit-autofill:focus,
+    .input-wrapper input:-webkit-autofill:active {
+      -webkit-text-fill-color: var(--color-text-primary);
+      box-shadow: 0 0 0 1000px var(--surface-muted-strong) inset;
+      -webkit-box-shadow: 0 0 0 1000px var(--surface-muted-strong) inset;
+      caret-color: var(--color-text-primary);
+      transition: background-color 9999s ease-out 0s;
     }
     .toggle-pwd {
       background: none;
       border: none;
       cursor: pointer;
-      font-size: 16px;
+      color: var(--color-text-secondary);
       padding: 4px;
+      display: inline-flex;
+      align-items: center;
     }
     .error-msg {
-      background: #fff5f5;
-      color: #e53e3e;
+      background: var(--overlay-loss-12);
+      color: var(--color-loss);
       padding: 10px 14px;
       border-radius: 8px;
       font-size: 13px;
-      border: 1px solid #fed7d7;
+      border: 1px solid var(--border-loss-soft);
     }
     .btn-primary {
       width: 100%;
       padding: 14px;
-      background: linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%);
-      color: #fff;
+      background: var(--color-primary);
+      color: var(--color-text-primary);
       border: none;
-      border-radius: 12px;
+      border-radius: var(--radius-md);
       font-size: 15px;
       font-weight: 600;
       cursor: pointer;
@@ -204,7 +226,7 @@ import { AuthService } from '../../../core/services/auth.service';
     }
     .btn-primary:hover:not(:disabled) {
       transform: translateY(-1px);
-      box-shadow: 0 8px 25px rgba(58,123,213,0.4);
+      box-shadow: 0 10px 22px var(--overlay-primary-36);
     }
     .btn-primary:disabled {
       opacity: 0.7;
@@ -213,8 +235,8 @@ import { AuthService } from '../../../core/services/auth.service';
     .spinner {
       width: 16px;
       height: 16px;
-      border: 2px solid rgba(255,255,255,0.3);
-      border-top-color: #fff;
+      border: 2px solid var(--text-on-dark-soft);
+      border-top-color: var(--color-text-primary);
       border-radius: 50%;
       animation: spin 0.6s linear infinite;
     }
@@ -223,10 +245,10 @@ import { AuthService } from '../../../core/services/auth.service';
       text-align: center;
       margin-top: 24px;
       font-size: 14px;
-      color: #666;
+      color: var(--color-text-secondary);
     }
     .auth-footer a {
-      color: #3a7bd5;
+      color: var(--color-primary);
       text-decoration: none;
       font-weight: 600;
     }
@@ -241,15 +263,13 @@ import { AuthService } from '../../../core/services/auth.service';
         flex-direction: column;
         justify-content: center;
         padding: 48px 64px;
-        color: #fff;
+        color: var(--color-text-primary);
         flex: 1;
       }
       .auth-info h2 {
-        font-size: 32px;
+        font-size: 22px;
         margin-bottom: 24px;
-        background: linear-gradient(135deg, #00d2ff, #fff);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        color: var(--color-text-primary);
       }
       .auth-info ul {
         list-style: none;
@@ -259,8 +279,18 @@ import { AuthService } from '../../../core/services/auth.service';
         gap: 16px;
       }
       .auth-info li {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
         font-size: 16px;
-        color: #b0bec5;
+        color: var(--color-text-secondary);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .auth-card {
+        width: min(480px, 92vw);
+        padding: var(--space-6);
       }
     }
   `]

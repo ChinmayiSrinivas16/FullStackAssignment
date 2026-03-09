@@ -1,0 +1,14 @@
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>Dashboard</h1>
+  </div>
+  
+  <div class="dashboard-content">
+    <app-stat-card></app-stat-card>
+    <app-chart-card></app-chart-card>
+  </div>
+
+  <div class="empty-state" *ngIf="!dataAvailable">
+    <app-empty-state></app-empty-state>
+  </div>
+</div>

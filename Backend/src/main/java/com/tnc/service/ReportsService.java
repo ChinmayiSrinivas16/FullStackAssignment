@@ -49,11 +49,11 @@ public class ReportsService {
     @Autowired
     private TransactionRepository transactionRepository;
 
-    private static final com.itextpdf.text.Font TITLE_FONT = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 18, com.itextpdf.text.Font.BOLD, new CMYKColor(0, 0, 0, 100));
-    private static final com.itextpdf.text.Font HEADER_FONT = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 14, com.itextpdf.text.Font.BOLD, new CMYKColor(0, 0, 0, 100));
-    private static final com.itextpdf.text.Font SUBHEADER_FONT = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12, com.itextpdf.text.Font.BOLD, new CMYKColor(0, 0, 0, 100));
-    private static final com.itextpdf.text.Font NORMAL_FONT = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 10, com.itextpdf.text.Font.NORMAL, new CMYKColor(0, 0, 0, 100));
-    private static final com.itextpdf.text.Font SMALL_FONT = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 8, com.itextpdf.text.Font.NORMAL, new CMYKColor(0, 0, 0, 100));
+    private static final com.itextpdf.text.Font TITLE_FONT = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 18, com.itextpdf.text.Font.BOLD, new com.itextpdf.text.BaseColor(0, 0, 0));
+    private static final com.itextpdf.text.Font HEADER_FONT = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 14, com.itextpdf.text.Font.BOLD, new com.itextpdf.text.BaseColor(0, 0, 0));
+    private static final com.itextpdf.text.Font SUBHEADER_FONT = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12, com.itextpdf.text.Font.BOLD, new com.itextpdf.text.BaseColor(0, 0, 0));
+    private static final com.itextpdf.text.Font NORMAL_FONT = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 10, com.itextpdf.text.Font.NORMAL, new com.itextpdf.text.BaseColor(0, 0, 0));
+    private static final com.itextpdf.text.Font SMALL_FONT = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 8, com.itextpdf.text.Font.NORMAL, new com.itextpdf.text.BaseColor(0, 0, 0));
 
     /**
      * Generate a report and return the file path

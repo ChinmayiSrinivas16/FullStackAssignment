@@ -17,7 +17,9 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/reports")
-@CrossOrigin
+@CrossOrigin(
+    origins = {"http://stockfolio.duckdns.org", "https://stockfolio.duckdns.org", "http://localhost"}
+)
 public class ReportsController {
 
     @Autowired
@@ -46,7 +48,7 @@ public class ReportsController {
             // Generate the report and get the file path
             String filePath = reportsService.generateReport(username, reportType, period, format);
             
-            // Extract report ID from filename (format: rpt_[uuid]_[type]_[period].[ext])
+            // Extract report ID from filename (format: [uuid]_[type]_[period].[ext])
             String fileName = new File(filePath).getName();
             String reportId = extractReportId(fileName);
             
@@ -75,12 +77,12 @@ public class ReportsController {
     }
 
     private String extractReportId(String fileName) {
-        // Filename format: rpt_[uuid]_[type]_[period].[ext]
-        // Example: rpt_a1b2c3d4_performance_monthly.pdf
+        // Filename format: [uuid]_[type]_[period].[ext]
+        // Example: a1b2c3d4_performance_monthly.pdf
         String baseName = fileName.substring(0, fileName.lastIndexOf('.')); // Remove extension
         String[] parts = baseName.split("_");
-        if (parts.length >= 2) {
-            return "rpt_" + parts[1]; // rpt_[uuid]
+        if (parts.length >= 1) {
+            return "rpt_" + parts[0]; // rpt_[uuid] - use parts[0] to get the UUID
         }
         return "rpt_" + UUID.randomUUID().toString().substring(0, 8);
     }
@@ -193,3 +195,4 @@ public class ReportsController {
         }
     }
 }
+

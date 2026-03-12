@@ -1,0 +1,22 @@
+{
+  "family": "db-task",
+  "executionRoleArn": "arn:aws:iam::197470385564:role/ecsTaskExecutionRole",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "containerDefinitions": [
+    {
+      "name": "db",
+      "image": "197470385564.dkr.ecr.us-east-1.amazonaws.com/thriam/stockfolio-db:8.0",
+      "essential": true,
+      "portMappings": [
+        { "containerPort": 3306, "protocol": "tcp" }
+      ],
+      "environment": [
+        { "name": "MYSQL_ROOT_PASSWORD", "value": "root" },
+        { "name": "MYSQL_DATABASE", "value": "stockdb" }
+      ]
+    }
+  ]
+}

@@ -12,7 +12,9 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/market")
-@CrossOrigin
+@CrossOrigin(
+    origins = {"http://stockfolio.duckdns.org", "https://stockfolio.duckdns.org", "http://localhost"}
+)
 public class MarketDataController {
 
     @Autowired

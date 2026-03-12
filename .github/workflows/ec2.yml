@@ -1,0 +1,176 @@
+name: Deploy Stockfolio to EC2
+
+on:
+  workflow_run:
+    workflows: ["Docker Package"]
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  launch-and-deploy:
+    runs-on: ubuntu-latest
+    env:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      AWS_REGION: us-east-1
+      VPC_ID: ${{ secrets.EC2_VPC_ID }}  # optional if you already have a VPC
+
+    outputs:
+      ec2_public_ip: ${{ steps.get_public_ip.outputs.ec2_ip }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS CLI with new credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCOUNT_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Create Security Group if not exists
+        id: create_sg
+        run: |
+          SG_NAME="stockfolio-sg"
+          SG_ID=$(aws ec2 describe-security-groups \
+            --filters "Name=group-name,Values=$SG_NAME" "Name=vpc-id,Values=${{ env.VPC_ID }}" \
+            --query "SecurityGroups[0].GroupId" --output text)
+          if [ "$SG_ID" == "None" ]; then
+            echo "Creating Security Group $SG_NAME..."
+            SG_ID=$(aws ec2 create-security-group \
+              --group-name $SG_NAME \
+              --description "Stockfolio ECS SG" \
+              --vpc-id ${{ env.VPC_ID }} \
+              --query 'GroupId' --output text)
+            aws ec2 authorize-security-group-ingress --group-id $SG_ID --protocol tcp --port 22 --cidr 0.0.0.0/0
+            aws ec2 authorize-security-group-ingress --group-id $SG_ID --protocol tcp --port 80 --cidr 0.0.0.0/0
+            aws ec2 authorize-security-group-ingress --group-id $SG_ID --protocol tcp --port 8080-8091 --cidr 0.0.0.0/0
+          else
+            echo "Security Group exists: $SG_ID"
+          fi
+          echo "SG_ID=$SG_ID" >> $GITHUB_ENV
+
+      - name: Create Public Subnet if not exists
+        id: create_subnet
+        run: |
+          SUBNET_CIDR="10.0.10.0/24"
+          SUBNET_ID=$(aws ec2 describe-subnets \
+            --filters "Name=vpc-id,Values=${{ env.VPC_ID }}" "Name=cidr-block,Values=$SUBNET_CIDR" \
+            --query "Subnets[0].SubnetId" --output text)
+          if [ "$SUBNET_ID" == "None" ]; then
+            echo "Creating subnet $SUBNET_CIDR..."
+            SUBNET_ID=$(aws ec2 create-subnet \
+              --vpc-id ${{ env.VPC_ID }} \
+              --cidr-block $SUBNET_CIDR \
+              --availability-zone ${{ env.AWS_REGION }}a \
+              --query 'Subnet.SubnetId' --output text)
+            aws ec2 modify-subnet-attribute --subnet-id $SUBNET_ID --map-public-ip-on-launch
+          else
+            echo "Subnet exists: $SUBNET_ID"
+          fi
+          echo "SUBNET_ID=$SUBNET_ID" >> $GITHUB_ENV
+
+      - name: Launch new EC2 instance
+        id: launch_ec2
+        run: |
+          INSTANCE_ID=$(aws ec2 run-instances \
+            --image-id ami-0abcdef1234567890 \
+            --instance-type t3.small \
+            --key-name ${{ secrets.EC2_KEY_NAME }} \
+            --security-group-ids ${{ env.SG_ID }} \
+            --subnet-id ${{ env.SUBNET_ID }} \
+            --associate-public-ip-address \
+            --query 'Instances[0].InstanceId' \
+            --output text)
+          echo "Launched EC2 instance: $INSTANCE_ID"
+          echo "INSTANCE_ID=$INSTANCE_ID" >> $GITHUB_ENV
+
+      - name: Wait for instance to be running and get public IP
+        id: get_public_ip
+        run: |
+          aws ec2 wait instance-running --instance-ids ${{ env.INSTANCE_ID }}
+          PUBLIC_IP=$(aws ec2 describe-instances \
+            --instance-ids ${{ env.INSTANCE_ID }} \
+            --query 'Reservations[0].Instances[0].PublicIpAddress' \
+            --output text)
+          echo "PUBLIC_IP=$PUBLIC_IP" >> $GITHUB_ENV
+          echo "::set-output name=ec2_ip::$PUBLIC_IP"
+
+      - name: Wait for SSH
+        run: |
+          while ! nc -z ${{ env.PUBLIC_IP }} 22; do
+            echo "Waiting for SSH on ${{ env.PUBLIC_IP }}..."
+            sleep 5
+          done
+
+      - name: Deploy Stockfolio via SSH
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ env.PUBLIC_IP }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            sudo dnf update -y
+            sudo dnf install docker -y
+            sudo systemctl start docker
+            sudo systemctl enable docker
+            sudo usermod -aG docker ec2-user
+            newgrp docker
+            mkdir -p ~/.docker/cli-plugins/
+            curl -SL https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64 -o ~/.docker/cli-plugins/docker-compose
+            chmod +x ~/.docker/cli-plugins/docker-compose
+            cd /home/ec2-user
+            cat <<'EOF' > docker-compose.yml
+            services:
+            db:
+                image: mysql:8.0
+                container_name: stockfolio-db
+                environment:
+                MYSQL_ROOT_PASSWORD: root
+                MYSQL_DATABASE: stockdb
+                ports:
+                - "3306:3306"
+                - "33060:33060"
+                volumes:
+                - db_data:/var/lib/mysql
+            market-data:
+                image: ${DOCKERHUB_USERNAME:-navlipi}/stockfolio-market-data:latest
+                container_name: stockfolio-market-data
+                ports:
+                - "7666:7666"
+            wallet:
+                image: ${DOCKERHUB_USERNAME:-navlipi}/stockfolio-wallet:latest
+                container_name: stockfolio-wallet
+                ports:
+                - "8091:8091"
+            about:
+                image: ${DOCKERHUB_USERNAME:-navlipi}/stockfolio-about:latest
+                container_name: stockfolio-about
+                ports:
+                - "8090:8090"
+            backend:
+                image: ${DOCKERHUB_USERNAME:-navlipi}/stockfolio-backend:latest
+                container_name: stockfolio-backend
+                environment:
+                SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/stockdb?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true
+                SPRING_DATASOURCE_USERNAME: root
+                SPRING_DATASOURCE_PASSWORD: root
+                WALLET_SERVICE_URL: http://wallet:8091
+                MARKET_DATA_BASE_URL: http://market-data:7666
+                ports:
+                - "8080:8080"
+            frontend:
+                image: ${DOCKERHUB_USERNAME:-navlipi}/stockfolio-frontend:latest
+                container_name: stockfolio-frontend
+                ports:
+                - "80:80"
+            volumes:
+                db_data:
+            EOF
+            docker compose up -d
+
+      - name: Output EC2 Public IP
+        run: |
+            echo "EC2 Public IP: ${{ steps.get_public_ip.outputs.ec2_ip }}"
+            echo "Stockfolio is now deployed on EC2 instance: ${{ env.INSTANCE_ID }}"

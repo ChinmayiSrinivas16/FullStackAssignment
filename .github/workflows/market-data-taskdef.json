@@ -1,0 +1,18 @@
+{
+  "family": "market-data-task",
+  "executionRoleArn": "arn:aws:iam::197470385564:role/ecsTaskExecutionRole",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "containerDefinitions": [
+    {
+      "name": "market-data",
+      "image": "197470385564.dkr.ecr.us-east-1.amazonaws.com/thriam/stockfolio-market-data:latest",
+      "essential": true,
+      "portMappings": [
+        { "containerPort": 7666, "protocol": "tcp" }
+      ]
+    }
+  ]
+}

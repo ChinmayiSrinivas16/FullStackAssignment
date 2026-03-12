@@ -1,0 +1,85 @@
+name: Deploy Stockfolio to ECS
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-ecs:
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      ECS_CLUSTER_NAME: "stockfolio-cluster"
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Create ECS cluster if not exists
+        run: |
+          CLUSTER_EXISTS=$(aws ecs describe-clusters --clusters $ECS_CLUSTER_NAME --query "clusters[?status=='ACTIVE'].clusterName" --output text)
+          if [ -z "$CLUSTER_EXISTS" ]; then
+            echo "Creating ECS cluster $ECS_CLUSTER_NAME"
+            aws ecs create-cluster --cluster-name $ECS_CLUSTER_NAME
+          else
+            echo "Cluster $ECS_CLUSTER_NAME already exists"
+          fi
+
+      - name: Register ECS task definitions if not exists
+        run: |
+          echo "Registering ECS task definitions"
+
+          for taskfile in about-task.json backend-task.json db-task.json frontend-task.json market-data-task.json wallet-task.json; do
+            FAMILY=$(jq -r '.family' $taskfile)
+            EXISTING=$(aws ecs describe-task-definition --task-definition $FAMILY >/dev/null 2>&1 && echo "exists" || echo "")
+
+            if [ -z "$EXISTING" ]; then
+              echo "Registering task definition $FAMILY"
+              aws ecs register-task-definition --cli-input-json file://$taskfile
+            else
+              echo "Task definition $FAMILY already exists, registering new revision"
+              aws ecs register-task-definition --cli-input-json file://$taskfile
+            fi
+          done
+
+      - name: Create or update ECS services if not exists
+        run: |
+          echo "Creating or updating ECS services"
+
+          declare -A SERVICES_PORTS=(
+            ["about-task"]=8090
+            ["backend-task"]=8080
+            ["db-task"]=3306
+            ["frontend-task"]=80
+            ["market-data-task"]=7666
+            ["wallet-task"]=8091
+          )
+
+          for task in "${!SERVICES_PORTS[@]}"; do
+            SERVICE_NAME="${task%-task}-service"
+            PORT=${SERVICES_PORTS[$task]}
+
+            SERVICE_EXISTS=$(aws ecs describe-services --cluster $ECS_CLUSTER_NAME --services $SERVICE_NAME --query "services[?status=='ACTIVE'].serviceName" --output text)
+
+            if [ -z "$SERVICE_EXISTS" ]; then
+              echo "Creating ECS service $SERVICE_NAME"
+              aws ecs create-service \
+                --cluster $ECS_CLUSTER_NAME \
+                --service-name $SERVICE_NAME \
+                --task-definition $task \
+                --desired-count 1 \
+                --launch-type FARGATE \
+                --network-configuration "awsvpcConfiguration={subnets=[${{ secrets.SUBNETS }}],securityGroups=[${{ secrets.SECURITY_GROUPS }}],assignPublicIp=ENABLED}"
+            else
+              echo "Service $SERVICE_NAME already exists, updating task definition"
+              aws ecs update-service \
+                --cluster $ECS_CLUSTER_NAME \
+                --service $SERVICE_NAME \
+                --task-definition $task
+            fi
+          done

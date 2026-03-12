@@ -1,10 +1,10 @@
 name: Deploy Stockfolio to EC2
 
 on:
-  workflow_run:
-    workflows: ["Docker Package"]
-    types:
-      - completed
+  # workflow_run:
+  #   workflows: ["Docker Package"]
+  #   types:
+  #     - completed
   workflow_dispatch:
 
 jobs:
@@ -54,7 +54,7 @@ jobs:
       - name: Create Public Subnet if not exists
         id: create_subnet
         run: |
-          SUBNET_CIDR="10.0.10.0/24"
+          SUBNET_CIDR=$(aws ec2 describe-vpcs --vpc-ids ${{ env.VPC_ID }} --query "Vpcs[0].CidrBlock" --output text)
           SUBNET_ID=$(aws ec2 describe-subnets \
             --filters "Name=vpc-id,Values=${{ env.VPC_ID }}" "Name=cidr-block,Values=$SUBNET_CIDR" \
             --query "Subnets[0].SubnetId" --output text)
@@ -75,7 +75,7 @@ jobs:
         id: launch_ec2
         run: |
           INSTANCE_ID=$(aws ec2 run-instances \
-            --image-id ami-0abcdef1234567890 \
+            --image-id ami-0c02fb55956c7d316 \
             --instance-type t3.small \
             --key-name ${{ secrets.EC2_KEY_NAME }} \
             --security-group-ids ${{ env.SG_ID }} \
@@ -123,50 +123,67 @@ jobs:
             cd /home/ec2-user
             cat <<'EOF' > docker-compose.yml
             services:
-            db:
-                image: mysql:8.0
-                container_name: stockfolio-db
-                environment:
-                MYSQL_ROOT_PASSWORD: root
-                MYSQL_DATABASE: stockdb
-                ports:
-                - "3306:3306"
-                - "33060:33060"
-                volumes:
-                - db_data:/var/lib/mysql
+
             market-data:
-                image: ${DOCKERHUB_USERNAME:-navlipi}/stockfolio-market-data:latest
-                container_name: stockfolio-market-data
-                ports:
+              image: ${DOCKERHUB_USERNAME:-navlipi}/stockfolio-market-data:latest
+              build:
+                context: ./Backend
+                dockerfile: Dockerfile.market_data
+              container_name: stockfolio-market-data
+              ports:
                 - "7666:7666"
+
             wallet:
-                image: ${DOCKERHUB_USERNAME:-navlipi}/stockfolio-wallet:latest
-                container_name: stockfolio-wallet
-                ports:
+              image: ${DOCKERHUB_USERNAME:-navlipi}/stockfolio-wallet:latest
+              build:
+                context: ./WalletMicroservice
+                dockerfile: Dockerfile
+              container_name: stockfolio-wallet
+              ports:
                 - "8091:8091"
+
             about:
-                image: ${DOCKERHUB_USERNAME:-navlipi}/stockfolio-about:latest
-                container_name: stockfolio-about
-                ports:
+              image: ${DOCKERHUB_USERNAME:-navlipi}/stockfolio-about:latest
+              build:
+                context: ./AboutMicroservice
+                dockerfile: Dockerfile
+              container_name: stockfolio-about
+              ports:
                 - "8090:8090"
+
             backend:
-                image: ${DOCKERHUB_USERNAME:-navlipi}/stockfolio-backend:latest
-                container_name: stockfolio-backend
-                environment:
-                SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/stockdb?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true
-                SPRING_DATASOURCE_USERNAME: root
-                SPRING_DATASOURCE_PASSWORD: root
+              image: ${DOCKERHUB_USERNAME:-navlipi}/stockfolio-backend:latest
+              build:
+                context: ./Backend
+                dockerfile: Dockerfile
+              container_name: stockfolio-backend
+              environment:
+                SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+                SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+                SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
                 WALLET_SERVICE_URL: http://wallet:8091
                 MARKET_DATA_BASE_URL: http://market-data:7666
-                ports:
+                JWT_SECRET: thisisatncproject
+              ports:
                 - "8080:8080"
+              depends_on:
+                wallet:
+                  condition: service_started
+                market-data:
+                  condition: service_started
+
             frontend:
-                image: ${DOCKERHUB_USERNAME:-navlipi}/stockfolio-frontend:latest
-                container_name: stockfolio-frontend
-                ports:
+              image: ${DOCKERHUB_USERNAME:-navlipi}/stockfolio-frontend:latest
+              build:
+                context: ./Frontend
+                dockerfile: Dockerfile
+              container_name: stockfolio-frontend
+              ports:
                 - "80:80"
-            volumes:
-                db_data:
+              depends_on:
+                - backend
+                - about
+                - wallet
             EOF
             docker compose up -d
 

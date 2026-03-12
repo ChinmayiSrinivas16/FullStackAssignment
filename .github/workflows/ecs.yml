@@ -34,7 +34,7 @@ jobs:
         run: |
           echo "Registering ECS task definitions"
 
-          for taskfile in about-task.json backend-task.json db-task.json frontend-task.json market-data-task.json wallet-task.json; do
+          for taskfile in about-task.json backend-task.json frontend-task.json market-data-task.json wallet-task.json; do
             FAMILY=$(jq -r '.family' $taskfile)
             EXISTING=$(aws ecs describe-task-definition --task-definition $FAMILY >/dev/null 2>&1 && echo "exists" || echo "")
 
